@@ -6,15 +6,17 @@ TASK=$3
 MODELSIZE=$4
 EPOCH=$5
 BSZ=$6
-MODALTYPE=$7  # Text_Only, Vision_Only, Vision_Text (both image and text)
-DATATYPE=$8  # Base, Base-Pruned, Aug, Aug-Pruned
-AUGTYPE=$9  # optional: none; edge_thickness, layout, node_shape, node_style (only working when DATATYPE=Aug or Aug-Pruned)
+LORAR=$7  # the rank of the low-rank matrices used in the LoRA adaptation (default: 128)
+LORAALPHA=$8  # the scaling factor that controls the magnitude of the low-rank adaptation (default: 256)
+MODALTYPE=$9  # Text_Only, Vision_Only, Vision_Text (both image and text)
+DATATYPE=${10}  # Base, Base-Pruned, Aug, Aug-Pruned
+AUGTYPE=${11}  # optional: none (when DATATYPE=Base or Base-Pruned); edge_thickness, layout, node_shape, node_style (when DATATYPE=Aug or Aug-Pruned)
 
 
 wandb offline
 if [ "$MODALTYPE" == "Text_Only" ]; then
-    checkpoint_path="./checkpoints/${MODALTYPE}-${DATATYPE}/vicuna-v1.5-${MODELSIZE}-${TASK}-lora-epoch-${EPOCH}"
     pretrained_model_path="../local_llm/vicuna-v1.5-${MODELSIZE}"
+    checkpoint_path="./checkpoints/${MODALTYPE}/${DATATYPE}/vicuna-v1.5-${MODELSIZE}-${TASK}-lora(${LORAR}, ${LORAALPHA})-epoch-${EPOCH}"
     data_path="../dataset/GITQA-${DATATYPE}/data/${TASK}/QA/Base/${MODALTYPE}_train.json"
 
     if [ -f "$checkpoint_path/adapter_config.json" ]; then
@@ -22,9 +24,7 @@ if [ "$MODALTYPE" == "Text_Only" ]; then
     else
         deepspeed --include localhost:"$GPU_IDS" --master_port "$PORT" fastchat/train/train_lora.py \
             --model_name_or_path "$pretrained_model_path" \
-            --lora_r 128 \
-            --lora_alpha 256 \
-            --lora_dropout 0.05 \
+            --lora_r "$LORAR" --lora_alpha "$LORAALPHA" --lora_dropout 0.05 \
             --data_path "$data_path" \
             --output_dir "$checkpoint_path" \
             --num_train_epochs "$EPOCH" \
@@ -58,18 +58,19 @@ elif [[ "$MODALTYPE" == *"Vision"* ]]; then
     if [[ ${DATATYPE} == *"Aug"* ]]; then
         # augmentation dataset path
         data_path="../dataset/GITQA-${DATATYPE}/data/${TASK}/QA/Aug/${AUGTYPE}_train.json"
-        checkpoint_path="./checkpoints/${MODALTYPE}-${DATATYPE}/${AUGTYPE}/llava-v1.5-${MODELSIZE}-${TASK}-lora-epoch-${EPOCH}"
+        checkpoint_path="./checkpoints/${MODALTYPE}-${DATATYPE}/${AUGTYPE}/llava-v1.5-${MODELSIZE}-${TASK}-lora(${LORAR}, ${LORAALPHA})-${EPOCH}"
     else
         # base dataset path
         data_path="../dataset/GITQA-${DATATYPE}/data/${TASK}/QA/Base/${MODALTYPE}_train.json"
-        checkpoint_path="./checkpoints/${MODALTYPE}-${DATATYPE}/llava-v1.5-${MODELSIZE}-${TASK}-lora-epoch-${EPOCH}"
+        checkpoint_path="./checkpoints/${MODALTYPE}-${DATATYPE}/llava-v1.5-${MODELSIZE}-${TASK}-lora(${LORAR}, ${LORAALPHA})-${EPOCH}"
     fi
 
     if [ -f "$checkpoint_path/adapter_config.json" ]; then
         echo "Checkpoint file already exist!!!"
     else
         deepspeed --include localhost:"$GPU_IDS" --master_port "$PORT" llava/train/train_mem.py \
-            --lora_enable True --lora_r 128 --lora_alpha 256 --mm_projector_lr 2e-5 \
+            --lora_enable True --lora_r "$LORAR" --lora_alpha "$LORAALPHA" \
+            --mm_projector_lr 2e-5 \
             --deepspeed ./scripts/zero3.json \
             --model_name_or_path "$pretrained_model_path" \
             --version v1 \

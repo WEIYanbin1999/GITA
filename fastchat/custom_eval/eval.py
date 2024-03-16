@@ -7,7 +7,6 @@ from tqdm import tqdm
 import shortuuid
 import networkx as nx
 from peft import PeftModel
-from collections import defaultdict
 from fastchat.model import get_conversation_template
 import re
 
@@ -146,7 +145,6 @@ class Evaluation:
 @torch.inference_mode()
 def get_model_answers(args):
     model_path = args.model_path
-    model_id = args.model_id
     input_file = args.question_file
     output_file = args.answer_file
     
@@ -161,7 +159,8 @@ def get_model_answers(args):
     model_path = os.path.expanduser(model_path)
     
     model, tokenizer = apply_lora(
-        base_model_path=model_path, lora_path=args.lora_path,
+        base_model_path=model_path,
+        lora_path=args.lora_path,
         model_max_length=args.model_max_length
     )
     # tokenizer = AutoTokenizer.from_pretrained(model_path, use_fast=False)
@@ -177,7 +176,7 @@ def get_model_answers(args):
         qa_conv = ques['conversations']
         qs = qa_conv[0]['value']
         gt = qa_conv[1]['value']
-        conv = get_conversation_template(model_id)
+        conv = get_conversation_template("vicuna")
         conv.append_message(conv.roles[0], qs)
         conv.append_message(conv.roles[1], None)
         prompt = conv.get_prompt()
@@ -221,11 +220,10 @@ def get_model_answers(args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("--model-path", type=str, required=True)
-    parser.add_argument("--lora-path", type=str, required=True)
-    parser.add_argument("--model-id", type=str, required=True)
-    parser.add_argument("--question-file", type=str, required=True)
-    parser.add_argument('--task', type=str, required=True)
+    parser.add_argument("--model-path", type=str, required=True, default="")
+    parser.add_argument("--lora-path", type=str, required=True, default="")
+    parser.add_argument("--question-file", type=str, required=True, default="")
+    parser.add_argument('--task', type=str, required=True, default="")
     parser.add_argument("--answer-file", type=str, default="answer.jsonl")
     parser.add_argument("--model_max_length", type=int, default=4096)
     parser.add_argument("--max_new_tokens", type=int, default=128)
