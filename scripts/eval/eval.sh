@@ -11,7 +11,7 @@ if [ "$MODALTYPE" == "Text_Only" ]; then
     pretrained_model_path="../local_llm/vicuna-v1.5-${MODELSIZE}"
     checkpoint_path="./checkpoints/${MODALTYPE}/${DATATYPE}/${TASK}/vicuna-v1.5-${MODELSIZE}-lora(${LORAR}, ${LORAALPHA})-epoch-${EPOCH}"
     data_path="../dataset/GITQA-${DATATYPE}/data/${TASK}/QA/Base/${MODALTYPE}_test.json"
-    answer_path="./answer/${MODALTYPE}/${DATATYPE}/vicuna-v1.5-${MODELSIZE}-${TASK}-lora(${LORAR}, ${LORAALPHA})-epoch-${EPOCH}.answer.jsonl"
+    answer_path="./answer/${MODALTYPE}/${DATATYPE}/${TASK}/vicuna-v1.5-${MODELSIZE}-lora(${LORAR}, ${LORAALPHA})-epoch-${EPOCH}.answer.jsonl"
 
     CUDA_VISIBLE_DEVICES=${GPU_IDS} \
     python -m fastchat.custom_eval.eval \

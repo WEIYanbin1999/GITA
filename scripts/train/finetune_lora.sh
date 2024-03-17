@@ -16,7 +16,7 @@ AUGTYPE=${11}  # optional: none (when DATATYPE=Base or Base-Pruned); edge_thickn
 wandb offline
 if [ "$MODALTYPE" == "Text_Only" ]; then
     pretrained_model_path="../local_llm/vicuna-v1.5-${MODELSIZE}"
-    checkpoint_path="./checkpoints/${MODALTYPE}/${DATATYPE}/vicuna-v1.5-${MODELSIZE}-${TASK}-lora(${LORAR}, ${LORAALPHA})-epoch-${EPOCH}"
+    checkpoint_path="./checkpoints/${MODALTYPE}/${DATATYPE}/${TASK}/vicuna-v1.5-${MODELSIZE}-lora(${LORAR}, ${LORAALPHA})-epoch-${EPOCH}"
     data_path="../dataset/GITQA-${DATATYPE}/data/${TASK}/QA/Base/${MODALTYPE}_train.json"
 
     if [ -f "$checkpoint_path/adapter_config.json" ]; then
@@ -58,11 +58,11 @@ elif [[ "$MODALTYPE" == *"Vision"* ]]; then
     if [[ ${DATATYPE} == *"Aug"* ]]; then
         # augmentation dataset path
         data_path="../dataset/GITQA-${DATATYPE}/data/${TASK}/QA/Aug/${AUGTYPE}_train.json"
-        checkpoint_path="./checkpoints/${MODALTYPE}-${DATATYPE}/${AUGTYPE}/llava-v1.5-${MODELSIZE}-${TASK}-lora(${LORAR}, ${LORAALPHA})-${EPOCH}"
+        checkpoint_path="./checkpoints/${MODALTYPE}/${DATATYPE}/${TASK}/${AUGTYPE}/llava-v1.5-${MODELSIZE}-lora(${LORAR}, ${LORAALPHA})-${EPOCH}"
     else
         # base dataset path
         data_path="../dataset/GITQA-${DATATYPE}/data/${TASK}/QA/Base/${MODALTYPE}_train.json"
-        checkpoint_path="./checkpoints/${MODALTYPE}-${DATATYPE}/llava-v1.5-${MODELSIZE}-${TASK}-lora(${LORAR}, ${LORAALPHA})-${EPOCH}"
+        checkpoint_path="./checkpoints/${MODALTYPE}/${DATATYPE}/${TASK}/llava-v1.5-${MODELSIZE}-lora(${LORAR}, ${LORAALPHA})-${EPOCH}"
     fi
 
     if [ -f "$checkpoint_path/adapter_config.json" ]; then
