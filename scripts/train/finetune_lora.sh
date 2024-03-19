@@ -46,12 +46,12 @@ if [ "$MODALTYPE" == "Text_Only" ]; then
             --tf32 True \
             --model_max_length 4096 \
             --q_lora False \
-            --deepspeed ./scripts/zero3.json \
+            --deepspeed ./scripts/zero3_offload.json \
             --gradient_checkpointing True \
             --flash_attn False
     fi
 
-elif [[ "$MODALTYPE" == *"Vision"* ]]; then
+elif [[ "$MODALTYPE" == "Vision_Only" || "$MODALTYPE" == "Vision_Text" ]]; then
     pretrained_model_path="../local_llm/llava-v1.5-${MODELSIZE}"
     image_folder="../dataset/GITQA-${DATATYPE}"
 
@@ -71,7 +71,7 @@ elif [[ "$MODALTYPE" == *"Vision"* ]]; then
         deepspeed --include localhost:"$GPU_IDS" --master_port "$PORT" llava/train/train_mem.py \
             --lora_enable True --lora_r "$LORAR" --lora_alpha "$LORAALPHA" \
             --mm_projector_lr 2e-5 \
-            --deepspeed ./scripts/zero3.json \
+            --deepspeed ./scripts/zero3_offload.json \
             --model_name_or_path "$pretrained_model_path" \
             --version v1 \
             --image_folder "$image_folder" \
@@ -88,7 +88,7 @@ elif [[ "$MODALTYPE" == *"Vision"* ]]; then
             --num_train_epochs "$EPOCH" \
             --per_device_train_batch_size "$BSZ" \
             --per_device_eval_batch_size 4 \
-            --gradient_accumulation_steps 1 \
+            --gradient_accumulation_steps 2 \
             --evaluation_strategy "no" \
             --save_strategy "steps" \
             --save_steps 500000 \
