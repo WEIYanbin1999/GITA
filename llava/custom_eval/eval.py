@@ -7,7 +7,7 @@ import json
 from tqdm import tqdm
 import networkx as nx
 
-from llava.constants import IMAGE_TOKEN_INDEX, DEFAULT_IMAGE_TOKEN, DEFAULT_IM_START_TOKEN, DEFAULT_IM_END_TOKEN
+from llava.constants import IMAGE_TOKEN_INDEX, DEFAULT_IMAGE_TOKEN, DEFAULT_IM_END_TOKEN
 from llava.conversation import conv_templates, SeparatorStyle
 from llava.model.builder import load_pretrained_model
 from llava.mm_utils import tokenizer_image_token, process_images, get_model_name_from_path
@@ -42,7 +42,7 @@ class CustomDataset(Dataset):
             elif self.task in ['hamilton', 'shortest_path']:
                 qs += ' Note! Don\'t give me any response except directly give one path as the answer, for example, 0->1->2->3->4. or 0->1->3->7->8->4->6->5->9->2.'
             elif self.task in ['topology']:
-                qs += ' Note! Directly provide a possible topological ordering path. No additional information or explanation is required. For example, 0->1->2->3->4. or 0->1->3->7->8->4->6->5->9->2. '
+                qs += ' Note! Directly provide a possible topological ordering path. No additional information or explanation is required. For example, 0,1,2,3,4. or 0,1,3,7,8,4,6,5,9,2.'
             elif self.task in ['gnn']:
                 qs += ' Note! Don\'t give me any response except directly give a list of updated embedding of all nodes, for example, You can tell me: The updated embeddings of each node:\nnode 0: [1,1]\nnode 1: [1,4]\nnode 2: [0,1]\nnode 3: [0,1]\nnode 4: [0,1].'
             else:
@@ -118,44 +118,51 @@ class Evaluation:
                 self.irrelevant[task_difficulty] += 1
 
         elif self.task == "hamilton":
-            candidate = output.split(".")[0].split('->')
-            candidate = list(map(int, candidate))
+            candidate = output.split(".")[-1].split(":")[-1].split("->")
+            if not candidate:
+                candidate = list(map(int, candidate))
 
-            G = nx.Graph()
-            with open(graph_path, "r") as f:
-                n, m = [int(x) for x in next(f).split()]
-                array = []
-                for line in f:  # read rest of lines
-                    array.append([int(x) for x in line.split()])
-                edges = array[:m]
-                assert len(edges) == m
-                G.add_nodes_from(range(n))
-                for edge in edges:
-                    G.add_edge(edge[0], edge[1])
+                G = nx.Graph()
+                with open(graph_path, "r") as f:
+                    n, m = [int(x) for x in next(f).split()]
+                    array = []
+                    for line in f:  # read rest of lines
+                        array.append([int(x) for x in line.split()])
+                    edges = array[:m]
+                    assert len(edges) == m
+                    G.add_nodes_from(range(n))
+                    for edge in edges:
+                        G.add_edge(edge[0], edge[1])
 
-            if self.is_hamiltonian_path(G=G, path=candidate):
-                self.correct[task_difficulty] += 1
+                if self.is_hamiltonian_path(G=G, path=candidate):
+                    self.correct[task_difficulty] += 1
+                else:
+                    self.irrelevant[task_difficulty] += 1
             else:
                 self.irrelevant[task_difficulty] += 1
 
         elif self.task == "topology":
             candidate = output.split(".")[0].split(',')
-            candidate = list(map(int, candidate))
 
-            G = nx.DiGraph()
-            with open(graph_path, "r") as f:
-                n, m = [int(x) for x in next(f).split()]
-                array = []
-                for line in f:  # read rest of lines
-                    array.append([int(x) for x in line.split()])
-                edges = array[:m]
-                assert len(edges) == m
-                G.add_nodes_from(range(n))
-                for edge in edges:
-                    G.add_edge(edge[0], edge[1])
+            if not candidate:
+                candidate = list(map(int, candidate))
 
-            if self.is_topological_order(G=G, order=candidate):
-                self.correct[task_difficulty] += 1
+                G = nx.DiGraph()
+                with open(graph_path, "r") as f:
+                    n, m = [int(x) for x in next(f).split()]
+                    array = []
+                    for line in f:  # read rest of lines
+                        array.append([int(x) for x in line.split()])
+                    edges = array[:m]
+                    assert len(edges) == m
+                    G.add_nodes_from(range(n))
+                    for edge in edges:
+                        G.add_edge(edge[0], edge[1])
+
+                if self.is_topological_order(G=G, order=candidate):
+                    self.correct[task_difficulty] += 1
+                else:
+                    self.irrelevant[task_difficulty] += 1
             else:
                 self.irrelevant[task_difficulty] += 1
 
