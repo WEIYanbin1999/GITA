@@ -36,15 +36,15 @@ elif [[ "$MODALTYPE" == *"Vision"* ]]; then
         # augmentation dataset path
         data_path="../dataset/GITQA-${DATATYPE}/data/${TASK}/QA/Aug/${AUGTYPE}_test.json"
         if [ "$TESTTYPE" == "fine-tuned" ]; then
-            answer_path="./answer/${MODALTYPE}/${DATATYPE}/${TASK}/${AUGTYPE}/llava-v1.5-${MODELSIZE}-lora(${LORAR}, ${LORAALPHA})-${EPOCH}-answer.jsonl"
-            checkpoint_path="./checkpoints/${MODALTYPE}/${DATATYPE}/${TASK}/${AUGTYPE}/llava-v1.5-${MODELSIZE}-lora(${LORAR}, ${LORAALPHA})-${EPOCH}"
+            answer_path="./answer/${MODALTYPE}/${DATATYPE}/${TASK}/${AUGTYPE}/llava-v1.5-${MODELSIZE}-lora(${LORAR}, ${LORAALPHA})-epoch-${EPOCH}-answer.jsonl"
+            checkpoint_path="./checkpoints/${MODALTYPE}/${DATATYPE}/${TASK}/${AUGTYPE}/llava-v1.5-${MODELSIZE}-lora(${LORAR}, ${LORAALPHA})-epoch-${EPOCH}"
         else
             answer_path="./answer/${MODALTYPE}/${DATATYPE}/${TASK}/${AUGTYPE}/llava-v1.5-${MODELSIZE}-zero-shot-answer.jsonl"
             checkpoint_path="$pretrained_model_path"
         fi
 
         CUDA_VISIBLE_DEVICES=${GPU_IDS} \
-        python -m llava.custom_eval.aug_eval \
+        python -m llava.custom_eval.eval \
             --task "$TASK" \
             --lora-path "$checkpoint_path" \
             --model-path "$pretrained_model_path" \
@@ -55,8 +55,8 @@ elif [[ "$MODALTYPE" == *"Vision"* ]]; then
         # base dataset path
         data_path="../dataset/GITQA-${DATATYPE}/data/${TASK}/QA/Base/${MODALTYPE}_test.json"
         if [ "$TESTTYPE" == "fine-tuned" ]; then
-            answer_path="./answer/${MODALTYPE}/${DATATYPE}/${TASK}/llava-v1.5-${MODELSIZE}-lora(${LORAR}, ${LORAALPHA})-${EPOCH}-answer.jsonl"
-            checkpoint_path="./checkpoints/${MODALTYPE}/${DATATYPE}/${TASK}/llava-v1.5-${MODELSIZE}-lora(${LORAR}, ${LORAALPHA})-${EPOCH}"
+            answer_path="./answer/${MODALTYPE}/${DATATYPE}/${TASK}/llava-v1.5-${MODELSIZE}-lora(${LORAR}, ${LORAALPHA})-epoch-${EPOCH}-answer.jsonl"
+            checkpoint_path="./checkpoints/${MODALTYPE}/${DATATYPE}/${TASK}/llava-v1.5-${MODELSIZE}-lora(${LORAR}, ${LORAALPHA})-epoch-${EPOCH}"
         else
             answer_path="./answer/${MODALTYPE}/${DATATYPE}/${TASK}/llava-v1.5-${MODELSIZE}-zero-shot-answer.jsonl"
             checkpoint_path="$pretrained_model_path"
