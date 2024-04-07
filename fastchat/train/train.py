@@ -18,9 +18,8 @@ from dataclasses import dataclass, field
 import json
 import math
 import pathlib
-from typing import Dict, Optional, Sequence
+from typing import Dict, Optional
 
-import numpy as np
 import torch
 from torch.utils.data import Dataset
 import transformers
