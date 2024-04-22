@@ -150,10 +150,18 @@ class Questioner(object):
         query += self.task_responsibility
         query += self.output_specification
         return query
+
+    def generate_t_query(self, graph_description):
+        query = ""
+        query += graph_description
+        query += self.task_responsibility
+        query += self.output_specification
+        return query
     
     
 class DataConstructor(object):
-    def __init__(self, data_name, save_path="./"):
+    def __init__(self, data_name, modalities='Vision_Text', save_path="./"):
+        self.modalities = modalities
         self.save_path = save_path
         self.data_name = data_name
         if data_name in ['Cora', 'CiteSeer']:
@@ -201,14 +209,18 @@ class DataConstructor(object):
                     node_labels[local_idx] = self.data.y[global_idx]
             node_labels[0] = -1
 
-            # Save visual graphs to path
-            self.graph_visualizer.convert_graph_to_image(
-                adjs[0].edge_index, os.path.join(self.save_path, image_path), node_labels,
-                'vary', 'light', False
-            )
             graph_description = self.graph_describer.convert_graph_to_description(adjs[0].edge_index, node_labels)
-            
-            query = self.questioner.generate_vt_query(graph_description)
+
+            if self.modalities == 'Vision_Text':
+                # Save visual graphs to path
+                self.graph_visualizer.convert_graph_to_image(adjs[0].edge_index, image_path, node_labels,
+                                                             'vary', 'light', False)
+                query = self.questioner.generate_vt_query(graph_description)
+                sample['image'] = image_path
+            elif self.modalities == 'Text_Only':
+                query = self.questioner.generate_t_query(graph_description)
+            else:
+                raise NotImplementedError("Do not support this type of modality.")
 
             # Write to the json file
             sample['id'] = self.data_name + '-' + str(n_id[0])
@@ -232,18 +244,26 @@ if __name__ == "__main__":
     # Initialization: Generate all the data once
     # Use: Call data_constructor_cora.construct_json() for data construction before each epoch
     seed_torch()
-    data_constructor_cora = DataConstructor(data_name='Cora', save_path="../dataset/Node_Cls")
+    data_constructor_cora = DataConstructor(
+        data_name='Cora', modalities="Vision_Text", save_path="../dataset/Node_Cls"
+    )
     data_constructor_cora.construct_json(data_split="train")
     data_constructor_cora.construct_json(data_split="test")
 
-    data_constructor_citeseer = DataConstructor('CiteSeer', save_path="../dataset/Node_Cls")
+    data_constructor_citeseer = DataConstructor(
+        data_name='CiteSeer', modalities="Vision_Text", save_path="../dataset/Node_Cls"
+    )
     data_constructor_citeseer.construct_json(data_split="train")
     data_constructor_citeseer.construct_json(data_split="test")
 
-    data_constructor_polblogs = DataConstructor('PolBlogs', save_path="../dataset/Node_Cls")
+    data_constructor_polblogs = DataConstructor(
+        data_name='PolBlogs', modalities="Vision_Text", save_path="../dataset/Node_Cls"
+    )
     data_constructor_polblogs.construct_json(data_split="train")
     data_constructor_polblogs.construct_json(data_split="test")
 
-    data_constructor_emaileucore = DataConstructor('email-Eu-core', save_path="../dataset/Node_Cls")
+    data_constructor_emaileucore = DataConstructor(
+        data_name='email-Eu-core', modalities="Vision_Text", save_path="../dataset/Node_Cls"
+    )
     data_constructor_emaileucore.construct_json(data_split="train")
     data_constructor_emaileucore.construct_json(data_split="test")
