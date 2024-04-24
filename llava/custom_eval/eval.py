@@ -7,8 +7,8 @@ import json
 from tqdm import tqdm
 import networkx as nx
 
-from llava.constants import IMAGE_TOKEN_INDEX, DEFAULT_IMAGE_TOKEN, DEFAULT_IM_END_TOKEN
-from llava.conversation import conv_templates, SeparatorStyle
+from llava.constants import IMAGE_TOKEN_INDEX
+from llava.conversation import conv_templates
 from llava.model.builder import load_pretrained_model
 from llava.mm_utils import tokenizer_image_token, process_images, get_model_name_from_path
 from torch.utils.data import Dataset, DataLoader
@@ -18,7 +18,7 @@ from PIL import Image
 
 # Custom dataset class
 class CustomDataset(Dataset):
-    def __init__(self, question_file, tokenizer, image_processor, model_config, test_type, task):
+    def __init__(self, args, question_file, tokenizer, image_processor, model_config, test_type, task):
         with open(question_file, "r") as j:
             self.contents = json.loads(j.read())
         self.tokenizer = tokenizer
@@ -27,6 +27,7 @@ class CustomDataset(Dataset):
         self.test_type = test_type
         self.task = task
         self.question_file = question_file
+        self.args = args
 
     def __getitem__(self, index):
         path_id = self.contents[index]["id"]
@@ -38,17 +39,19 @@ class CustomDataset(Dataset):
             if self.task in ['cycle', 'connectivity']:
                 qs += ' Note! You response should exactly contain one word: Yes. or No.'
             elif self.task in ['flow', 'matching']:
-                qs += ' Note! Don\'t give me any response except directly give one number as the answer, for example, 3. or 8.'
+                qs += (' Note! Don\'t give me any response except directly give one number as the answer,'
+                       ' for example, 3. or 8.')
             elif self.task in ['hamilton', 'shortest_path']:
-                qs += ' Note! Don\'t give me any response except directly give one path as the answer, for example, 0->1->2->3->4. or 0->1->3->7->8->4->6->5->9->2.'
+                qs += (' Note! Don\'t give me any response except directly give one path as the answer,'
+                       ' for example, 0->1->2->3->4. or 0->1->3->7->8->4->6->5->9->2.')
             elif self.task in ['topology']:
-                qs += ' Note! Directly provide a possible topological ordering path. No additional information or explanation is required. For example, 0,1,2,3,4. or 0,1,3,7,8,4,6,5,9,2.'
-            elif self.task in ['gnn']:
-                qs += ' Note! Don\'t give me any response except directly give a list of updated embedding of all nodes, for example, You can tell me: The updated embeddings of each node:\nnode 0: [1,1]\nnode 1: [1,4]\nnode 2: [0,1]\nnode 3: [0,1]\nnode 4: [0,1].'
+                qs += (' Note! Directly provide a possible topological ordering path. '
+                       'No additional information or explanation is required,'
+                       ' for example, 0,1,2,3,4. or 0,1,3,7,8,4,6,5,9,2.')
             else:
                 raise ValueError("Do not support this task for zero-shot evaluation!")
 
-        conv = conv_templates[args.conv_mode].copy()
+        conv = conv_templates[self.args.conv_mode].copy()
         conv.append_message(conv.roles[0], qs)
         conv.append_message(conv.roles[1], None)
         prompt = conv.get_prompt()
@@ -65,18 +68,19 @@ class CustomDataset(Dataset):
 
 
 # DataLoader
-def create_data_loader(question_file, tokenizer, image_processor, model_config, test_type, task, batch_size=1, num_workers=2):
+def create_data_loader(args, question_file, tokenizer, image_processor, model_config, test_type, task,
+                       batch_size=1, num_workers=2):
     assert batch_size == 1, "batch_size must be 1"
-    dataset = CustomDataset(question_file, tokenizer, image_processor, model_config, test_type, task)
+    dataset = CustomDataset(args, question_file, tokenizer, image_processor, model_config, test_type, task)
     data_loader = DataLoader(dataset, batch_size=batch_size, num_workers=num_workers, shuffle=False)
     return data_loader
 
 
 class Evaluation:
     def __init__(self, task):
-        self.correct = {"easy": 0, "medium": 0, "hard": 0}
-        self.total = {"easy": 0, "medium": 0, "hard": 0}
-        self.irrelevant = {"easy": 0, "medium": 0, "hard": 0}
+        self.correct = {"easy": 0, "medium": 0, "hard": 0, "average": 0}
+        self.total = {"easy": 0, "medium": 0, "hard": 0, "average": 0}
+        self.irrelevant = {"easy": 0, "medium": 0, "hard": 0, "average": 0}
         self.task = task
 
     @staticmethod
@@ -110,14 +114,7 @@ class Evaluation:
         graph_path = os.path.join("/".join(ques_file_path.split("/")[:4]), task,
                                   "graph_structure", task_difficulty, graph_id + ".txt")
 
-        if self.task == "gnn":
-            if output.startswith("The updated embeddings of each node:"):
-                if output == ground_truth:
-                    self.correct[task_difficulty] += 1
-            else:
-                self.irrelevant[task_difficulty] += 1
-
-        elif self.task == "hamilton":
+        if self.task == "hamilton":
             candidate = output.split(".")[-1].split(":")[-1].split("->")
             if not candidate:
                 candidate = list(map(int, candidate))
@@ -136,10 +133,13 @@ class Evaluation:
 
                 if self.is_hamiltonian_path(G=G, path=candidate):
                     self.correct[task_difficulty] += 1
+                    self.correct["average"] += 1
                 else:
                     self.irrelevant[task_difficulty] += 1
+                    self.irrelevant["average"] += 1
             else:
                 self.irrelevant[task_difficulty] += 1
+                self.irrelevant["average"] += 1
 
         elif self.task == "topology":
             candidate = output.split(".")[0].split(',')
@@ -161,20 +161,26 @@ class Evaluation:
 
                 if self.is_topological_order(G=G, order=candidate):
                     self.correct[task_difficulty] += 1
+                    self.correct["average"] += 1
                 else:
                     self.irrelevant[task_difficulty] += 1
+                    self.irrelevant["average"] += 1
             else:
                 self.irrelevant[task_difficulty] += 1
+                self.irrelevant["average"] += 1
 
         else:
             # The answers to other tasks are in the form of xxx.
             if len(output.split(".")) == 2:
                 if output == ground_truth:
                     self.correct[task_difficulty] += 1
+                    self.correct["average"] += 1
             else:
                 self.irrelevant[task_difficulty] += 1
+                self.irrelevant["average"] += 1
 
         self.total[task_difficulty] += 1
+        self.total["average"] += 1
         return self.correct, self.irrelevant, self.total
 
 
@@ -191,7 +197,8 @@ def eval_model(args):
     os.makedirs(os.path.dirname(answer_file), exist_ok=True)
     ans_file = open(answer_file, "w")
 
-    data_loader = create_data_loader(question_file, tokenizer, image_processor, model.config, args.test_type, args.task)
+    data_loader = create_data_loader(args, question_file, tokenizer, image_processor, model.config,
+                                     args.test_type, args.task)
 
     # build iterator for evaluation
     evaluation = Evaluation(task=args.task)
@@ -206,17 +213,16 @@ def eval_model(args):
         if isinstance(gt, tuple):
             gt = gt[0]
 
-        with torch.inference_mode():
-            output_ids = model.generate(
-                input_ids,
-                images=image_tensor.to(dtype=torch.float16, device='cuda', non_blocking=True),
-                do_sample=True if args.temperature > 0 else False,
-                temperature=args.temperature,
-                top_p=args.top_p,
-                num_beams=args.num_beams,
-                max_new_tokens=args.max_new_tokens,
-                use_cache=True
-            )
+        output_ids = model.generate(
+            input_ids,
+            images=image_tensor.to(dtype=torch.float16, device='cuda', non_blocking=True),
+            do_sample=True if args.temperature > 0 else False,
+            temperature=args.temperature,
+            top_p=args.top_p,
+            num_beams=args.num_beams,
+            max_new_tokens=args.max_new_tokens,
+            use_cache=True
+        )
 
         input_token_len = input_ids.shape[1]
         n_diff_input_output = (input_ids != output_ids[:, :input_token_len]).sum().item()
@@ -245,6 +251,7 @@ def eval_model(args):
     ans_file.write(
         json.dumps(
             {
+                "average accuracy": correct["average"] / total["average"],
                 "easy accuracy": correct["easy"] / total["easy"] if total["easy"] else "null",
                 "medium accuracy": correct["medium"] / total["medium"] if total["medium"] else "null",
                 "hard accuracy": correct["hard"] / total["hard"] if total["hard"] else "null",
@@ -271,6 +278,6 @@ if __name__ == "__main__":
     parser.add_argument("--top_p", type=float, default=None)
     parser.add_argument("--num_beams", type=int, default=1)
     parser.add_argument("--max_new_tokens", type=int, default=128)
-    args = parser.parse_args()
+    arg = parser.parse_args()
 
-    eval_model(args)
+    eval_model(args=arg)
