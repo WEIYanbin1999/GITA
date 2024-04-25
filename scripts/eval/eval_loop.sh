@@ -1,7 +1,7 @@
 #!/bin/bash
 
 gpu_ids=(
-    "6"
+    "1"
 )
 
 declare -a hyper_1=(
@@ -22,12 +22,12 @@ declare -a hyper_1=(
 )
 
 declare -a hyper_2=(
-#    "7b none none none zero-shot Vision_Only GITQA-BASE none"
-#    "7b none none none zero-shot Vision_Text GITQA-BASE none"
-#    "13b none none none zero-shot Vision_Only GITQA-BASE none"
-#    "13b none none none zero-shot Vision_Text GITQA-BASE none"
-    "7b 5 64 16 fine-tuned Vision_Only GITQA-BASE True"
-    "7b 5 64 16 fine-tuned Vision_Only GITQA-BASE False"
+    "7b none none none zero-shot Vision_Only GITQA-BASE none"
+    "7b none none none zero-shot Vision_Text GITQA-BASE none"
+    "13b none none none zero-shot Vision_Only GITQA-BASE none"
+    "13b none none none zero-shot Vision_Text GITQA-BASE none"
+#    "7b 5 64 16 fine-tuned Vision_Only GITQA-BASE True"
+#    "7b 5 64 16 fine-tuned Vision_Only GITQA-BASE False"
 )
 
 declare -a params=()

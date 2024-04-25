@@ -29,6 +29,7 @@ from dataclasses import dataclass, field
 import torch
 import transformers
 
+from transformers.trainer_callback import TrainerCallback
 from llava.constants import IGNORE_INDEX, DEFAULT_IMAGE_TOKEN, DEFAULT_IM_START_TOKEN, DEFAULT_IM_END_TOKEN
 from torch.utils.data import Dataset
 from llava.train.llava_trainer import LLaVATrainer
@@ -39,6 +40,8 @@ from llava.mm_utils import tokenizer_image_token
 
 from PIL import Image
 from torch.backends import cudnn
+
+from data_builder import nodecls_builder
 
 local_rank = None
 
@@ -69,7 +72,7 @@ class DataArguments:
                            metadata={"help": "Path to the training data."})
     lazy_preprocess: bool = False
     is_multimodal: bool = False
-    image_folder: Optional[str] = field(default=None)
+    parent_dir: Optional[str] = field(default=None)
     image_aspect_ratio: str = 'square'
 
 
@@ -80,6 +83,10 @@ class TrainingArguments(transformers.TrainingArguments):
     remove_unused_columns: bool = field(default=False)
     freeze_mm_mlp_adapter: bool = field(default=False)
     unfreeze_mm_vision_tower: bool = field(default=False)
+    task_name: str = field(default="cycle")
+    task_type: str = field(default="GITQA-BASE")
+    modal_type: str = field(default="Vision_Only")
+    parent_dir: str = field(default="../datset/GITQA-BASE")
     mpt_attn_impl: Optional[str] = field(default="triton")
     model_max_length: int = field(
         default=512,
@@ -669,9 +676,9 @@ class LazySupervisedDataset(Dataset):
         assert len(sources) == 1, "Don't know why it is wrapped to a list"  # FIXME
         if 'image' in sources[0]:
             image_file = self.list_data_dict[i]['image']
-            image_folder = self.data_args.image_folder
+            parent_dir = self.data_args.parent_dir
             processor = self.data_args.image_processor
-            image = Image.open(os.path.join(image_folder, image_file)).convert('RGB')
+            image = Image.open(os.path.join(parent_dir, image_file)).convert('RGB')
             if self.data_args.image_aspect_ratio == 'pad':
                 def expand2square(pil_img, background_color):
                     width, height = pil_img.size
@@ -787,6 +794,21 @@ def log_parameters_size(model):
         "lora_parameters_size": lora_parameters_size,
         "non_lora_parameters_size": non_lora_parameters_size
     })
+
+
+class MyCallback(TrainerCallback):
+    """
+    Event called at the end of an epoch during training.
+    """
+    def on_epoch_end(self, args, state, control, **kwargs):
+        if args.task_type == "NODECLS":
+            data_constructor = nodecls_builder.DataConstructor(
+                task_name=args.task_name,
+                modalities=args.modal_type,
+                save_path=args.parent_dir
+            )
+            # update dataset for each epoch during training
+            data_constructor.construct_json(data_split="train")
 
 
 def train():
@@ -929,6 +951,8 @@ def train():
         model.config.tune_mm_mlp_adapter = training_args.tune_mm_mlp_adapter = model_args.tune_mm_mlp_adapter
         model.config.unfreeze_mm_vision_tower = training_args.unfreeze_mm_vision_tower
         model.config.freeze_mm_mlp_adapter = training_args.freeze_mm_mlp_adapter
+
+        training_args.parent_dir = data_args.parent_dir
 
         # default: false
         if model_args.tune_mm_mlp_adapter:

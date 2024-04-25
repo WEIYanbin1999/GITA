@@ -9,22 +9,25 @@ BSZ=$6
 LORAR=$7  # The rank of the low-rank matrices used in the LoRA adaptation (default: 64)
 LORAALPHA=$8  # The scaling factor that controls the magnitude of the low-rank adaptation (default: 16)
 MODALTYPE=$9  # Text_Only, Vision_Only, Vision_Text (both image and text)
-DATATYPE=${10}  # GITQA-BASE, GITQA-AUGET, GITQA-AUGLY, GITQA-AUGNO, GITQA-AUGNS; NODECLS; LINKPRED
+TASKTYPE=${10}  # GITQA-BASE, GITQA-AUGET, GITQA-AUGLY, GITQA-AUGNO, GITQA-AUGNS; NODECLS; LINKPRED
 UNFREEZEV=${11}  # Optional: Fine-tune vision tower or not when Vision_Only or Vision_Text. If True, yes. (default: True)
 
 
 wandb offline
-gradient_accumulation_steps=$((128 / "$BSZ"))
-if [[ "$DATATYPE" == *"GITQA"* ]]; then
-    data_path="../dataset/${DATATYPE}/data/${TASK}/QA/${MODALTYPE}_train.json"
+
+gpu_count=$(echo "$GPU_IDS" | tr ',' '\n' | wc -l)
+gradient_accumulation_steps=$((128 / "$BSZ" / "$gpu_count"))
+
+if [[ "$TASKTYPE" == *"GITQA"* ]]; then
+    data_path="../dataset/${TASKTYPE}/data/${TASK}/QA/${MODALTYPE}_train.json"
 else
     # i.e. NODECLS or LINKPRED
-    data_path="../dataset/${DATATYPE}/data/${TASK}/${MODALTYPE}_train.json"
+    data_path="../dataset/${TASKTYPE}/data/${TASK}/${MODALTYPE}_train.json"
 fi
 
 if [ "$MODALTYPE" == "Text_Only" ]; then
     pretrained_model_path="../local_llm/vicuna-v1.5-${MODELSIZE}"
-    checkpoint_path="./checkpoints/${MODALTYPE}/${DATATYPE}/${TASK}/vicuna-v1.5-${MODELSIZE}-lora(${LORAR}, ${LORAALPHA})-epoch-${EPOCH}"
+    checkpoint_path="./checkpoints/${MODALTYPE}/${TASKTYPE}/${TASK}/vicuna-v1.5-${MODELSIZE}-lora(${LORAR}, ${LORAALPHA})-epoch-${EPOCH}"
 
     if [ -f "$checkpoint_path/adapter_config.json" ]; then
         echo "Checkpoint file already exist!!!"
@@ -60,9 +63,9 @@ if [ "$MODALTYPE" == "Text_Only" ]; then
 
 elif [[ "$MODALTYPE" == "Vision_Only" || "$MODALTYPE" == "Vision_Text" ]]; then
     pretrained_model_path="../local_llm/llava-v1.5-${MODELSIZE}"
-    image_folder="../dataset/${DATATYPE}"
+    parent_dir="../dataset/${TASKTYPE}"
 
-    checkpoint_path="./checkpoints/${MODALTYPE}/${DATATYPE}/${TASK}/llava-v1.5-${MODELSIZE}-lora(${LORAR}, ${LORAALPHA})-unfreeze_vit-${UNFREEZEV}-epoch-${EPOCH}"
+    checkpoint_path="./checkpoints/${MODALTYPE}/${TASKTYPE}/${TASK}/llava-v1.5-${MODELSIZE}-lora(${LORAR}, ${LORAALPHA})-unfreeze_vit-${UNFREEZEV}-epoch-${EPOCH}"
 
     if [ -f "$checkpoint_path/adapter_config.json" ]; then
         echo "Checkpoint file already exist!!!"
@@ -73,7 +76,10 @@ elif [[ "$MODALTYPE" == "Vision_Only" || "$MODALTYPE" == "Vision_Text" ]]; then
             --deepspeed ./scripts/zero3_offload.json \
             --model_name_or_path "$pretrained_model_path" \
             --version v1 \
-            --image_folder "$image_folder" \
+            --parent_dir "$parent_dir" \
+            --task_type "$TASKTYPE" \
+            --task_name "$TASK" \
+            --modal_type "$MODALTYPE" \
             --data_path "$data_path" \
             --vision_tower openai/clip-vit-large-patch14-336 \
             --unfreeze_mm_vision_tower "$UNFREEZEV" \

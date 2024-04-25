@@ -8,7 +8,7 @@ import json
 import matplotlib.pyplot as plt
 from tqdm import tqdm
 from torch.backends import cudnn
-from data_modules import MyPolblogsDataset, MyPlanetoidDataset, MyEmailEuCoreDataset
+from nodecls_modules import MyPolblogsDataset, MyPlanetoidDataset, MyEmailEuCoreDataset
 
 
 def seed_torch(seed=42):
@@ -28,12 +28,12 @@ def worker_init_fn(worker_id):
 
 
 class GraphVisualizer(object):
-    def __init__(self, num_class, data_name, save_path="./"):
+    def __init__(self, num_class, task_name, save_path="./"):
         self.num_class = num_class
         self.light_colors = [self.random_light_color() for _ in range(num_class)]
         self.deep_colors = [self.random_deep_color() for _ in range(num_class)]
         self.layout_list = ["dot", "neato", "circo", "twopi", "fdp", "sfdp"]
-        self.visualize_colors(data_name=data_name, save_path=save_path)
+        self.visualize_colors(task_name=task_name, save_path=save_path)
 
     @staticmethod
     def random_light_color():
@@ -49,14 +49,14 @@ class GraphVisualizer(object):
         b = random.randint(0, 128)
         return "#{:02x}{:02x}{:02x}".format(r, g, b)
 
-    def visualize_colors(self, data_name, save_path):
+    def visualize_colors(self, task_name, save_path):
         fig, ax = plt.subplots()
         x = range(self.num_class)
         ax.barh(x, [1]*self.num_class, color=self.light_colors)
         ax.barh(x, [-1]*self.num_class, color=self.deep_colors)
         ax.axis('off')
         file_name = f'color_chart_{self.num_class}.png'
-        file_path = os.path.join(save_path, "data", data_name, file_name)
+        file_path = os.path.join(save_path, "data", task_name, file_name)
         os.makedirs(os.path.dirname(file_path), exist_ok=True)
         plt.savefig(file_path)
         plt.close(fig)  
@@ -160,17 +160,17 @@ class Questioner(object):
     
     
 class DataConstructor(object):
-    def __init__(self, data_name, modalities='Vision_Text', save_path="./"):
+    def __init__(self, task_name, modalities='Vision_Text', save_path="./"):
         self.modalities = modalities
         self.save_path = save_path
-        self.data_name = data_name
-        if data_name in ['Cora', 'CiteSeer']:
-            my_data = MyPlanetoidDataset(data_name=data_name, save_path=save_path)
+        self.task_name = task_name
+        if task_name in ['Cora', 'CiteSeer']:
+            my_data = MyPlanetoidDataset(task_name=task_name, save_path=save_path)
             sample_sizes = [5, 5]
-        elif data_name in ['PolBlogs']:
+        elif task_name in ['PolBlogs']:
             my_data = MyPolblogsDataset(save_path=save_path)
             sample_sizes = [5, 5]
-        elif data_name in ['email-Eu-core']:
+        elif task_name in ['email-Eu-core']:
             my_data = MyEmailEuCoreDataset(save_path=save_path)
             sample_sizes = [5, 5]
         else:
@@ -189,7 +189,7 @@ class DataConstructor(object):
             num_workers=4, worker_init_fn=worker_init_fn
         )
         
-        self.graph_visualizer = GraphVisualizer(self.num_classes, data_name=data_name, save_path=save_path)
+        self.graph_visualizer = GraphVisualizer(self.num_classes, task_name=task_name, save_path=save_path)
         self.graph_describer = GraphDescriber(self.num_classes)
         self.questioner = Questioner(self.num_classes)
         
@@ -201,7 +201,7 @@ class DataConstructor(object):
             n_id = n_id.tolist()
             
             sample = {}
-            image_path = f"data/{self.data_name}/image/{data_split}/subgraph_image_{n_id[0]}.png"
+            image_path = f"data/{self.task_name}/image/{data_split}/subgraph_image_{n_id[0]}.png"
             node_labels = -1 * np.ones((len(n_id),), dtype=np.int64)
 
             for local_idx, global_idx in enumerate(n_id):
@@ -223,7 +223,7 @@ class DataConstructor(object):
                 raise NotImplementedError("Do not support this type of modality.")
 
             # Write to the json file
-            sample['id'] = self.data_name + '-' + str(n_id[0])
+            sample['id'] = self.task_name + '-' + str(n_id[0])
             sample['image'] = image_path
             sample["conversations"] = []
             sample["conversations"].append({
@@ -236,7 +236,7 @@ class DataConstructor(object):
             })
             
             train_samples.append(sample)
-        with open(os.path.join(self.save_path, f'data/{self.data_name}/Vision_Text_{data_split}.json'), 'w') as f:
+        with open(os.path.join(self.save_path, f'data/{self.task_name}/Vision_Text_{data_split}.json'), 'w') as f:
             json.dump(train_samples, f, indent=4)
             
 
@@ -245,25 +245,25 @@ if __name__ == "__main__":
     # Use: Call data_constructor_cora.construct_json() for data construction before each epoch
     seed_torch()
     data_constructor_cora = DataConstructor(
-        data_name='Cora', modalities="Vision_Text", save_path="../dataset/Node_Cls"
+        task_name='Cora', modalities="Vision_Text", save_path="../dataset/NODECLS"
     )
     data_constructor_cora.construct_json(data_split="train")
     data_constructor_cora.construct_json(data_split="test")
 
     data_constructor_citeseer = DataConstructor(
-        data_name='CiteSeer', modalities="Vision_Text", save_path="../dataset/Node_Cls"
+        task_name='CiteSeer', modalities="Vision_Text", save_path="../dataset/NODECLS"
     )
     data_constructor_citeseer.construct_json(data_split="train")
     data_constructor_citeseer.construct_json(data_split="test")
 
     data_constructor_polblogs = DataConstructor(
-        data_name='PolBlogs', modalities="Vision_Text", save_path="../dataset/Node_Cls"
+        task_name='PolBlogs', modalities="Vision_Text", save_path="../dataset/NODECLS"
     )
     data_constructor_polblogs.construct_json(data_split="train")
     data_constructor_polblogs.construct_json(data_split="test")
 
     data_constructor_emaileucore = DataConstructor(
-        data_name='email-Eu-core', modalities="Vision_Text", save_path="../dataset/Node_Cls"
+        task_name='email-Eu-core', modalities="Vision_Text", save_path="../dataset/NODECLS"
     )
     data_constructor_emaileucore.construct_json(data_split="train")
     data_constructor_emaileucore.construct_json(data_split="test")
