@@ -14,11 +14,10 @@
 #    See the License for the specific language governing permissions and
 #    limitations under the License.
 import pdb
+import os
 import random
 import numpy as np
 import wandb
-
-import os
 import copy
 import json
 import logging
@@ -41,7 +40,7 @@ from llava.mm_utils import tokenizer_image_token
 from PIL import Image
 from torch.backends import cudnn
 
-from data_builder import nodecls_builder
+import nodecls_builder
 
 local_rank = None
 
