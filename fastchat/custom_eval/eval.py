@@ -1,16 +1,15 @@
 import argparse
 import pdb
 
-from transformers import AutoTokenizer, AutoModelForCausalLM, LlamaForCausalLM
+from transformers import AutoTokenizer, AutoModelForCausalLM
 import torch
 import os
 import json
 from tqdm import tqdm
-import shortuuid
 import networkx as nx
 from peft import PeftModel
 from fastchat.model import get_conversation_template
-import re
+
 
 def load_model(base_model_path, lora_path, test_type):
     tokenizer = AutoTokenizer.from_pretrained(base_model_path, use_fast=False)
@@ -169,16 +168,18 @@ def eval_model(args):
         task = path_id.split("-")[0]
 
         if args.test_type == "zero-shot":
-            if task in ['cycle', 'connectivity']:
+            if args.task in ['cycle', 'connectivity']:
                 qs += ' Note! You response should exactly contain one word: Yes. or No.'
-            elif task in ['flow', 'matching']:
-                qs += ' Note! Don\'t give me any response except directly give one number as the answer, for example, 3. or 8.'
-            elif task in ['hamilton', 'shortest_path']:
-                qs += ' Note! Don\'t give me any response except directly give one path as the answer, for example, 0->1->2->3->4. or 0->1->3->7->8->4->6->5->9->2.'
-            elif task in ['topology']:
-                qs += ' Note! Directly provide a possible topological ordering path. No additional information or explanation is required. For example, 0->1->2->3->4. or 0->1->3->7->8->4->6->5->9->2. '
-            elif task in ['gnn']:
-                qs += ' Note! Don\'t give me any response except directly give a list of updated embedding of all nodes, for example, You can tell me: The updated embeddings of each node:\nnode 0: [1,1]\nnode 1: [1,4]\nnode 2: [0,1]\nnode 3: [0,1]\nnode 4: [0,1].'
+            elif args.task in ['flow', 'matching']:
+                qs += (' Note! Don\'t give me any response except directly give one number as the answer,'
+                       ' for example, 3. or 8.')
+            elif args.task in ['hamilton', 'shortest_path']:
+                qs += (' Note! Don\'t give me any response except directly give one path as the answer,'
+                       ' for example, 0->1->2->3->4. or 0->1->3->7->8->4->6->5->9->2.')
+            elif args.task in ['topology']:
+                qs += (' Note! Directly provide a possible topological ordering path. '
+                       'No additional information or explanation is required,'
+                       ' for example, 0,1,2,3,4. or 0,1,3,7,8,4,6,5,9,2.')
             else:
                 raise ValueError("Do not support this task for zero-shot evaluation!")
 
