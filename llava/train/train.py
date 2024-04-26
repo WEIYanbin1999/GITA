@@ -90,15 +90,19 @@ class TrainingArguments(transformers.TrainingArguments):
     init_data_dir: Optional[str] = field(
         default="../datset/NODECLS",
         metadata={
-            "help":
-            "The parent directory for initially generate large graph data."
+            "help": "The parent directory for initially generate large graph data."
+        }
+    )
+    layout_aug: Optional[bool] = field(
+        default=False,
+        metadata={
+            "help": "Execute layout augmentation when training large graph data or not."
         }
     )
     model_max_length: int = field(
         default=512,
         metadata={
-            "help":
-            "Maximum sequence length. Sequences will be right padded (and possibly truncated)."
+            "help": "Maximum sequence length. Sequences will be right padded (and possibly truncated)."
         },
     )
     double_quant: bool = field(
@@ -487,7 +491,7 @@ def preprocess_v1(
                 round_len = len(tokenizer(rou).input_ids)
                 instruction_len = len(tokenizer(parts[0]).input_ids) - 2
 
-            target[cur_len : cur_len + instruction_len] = IGNORE_INDEX
+            target[cur_len: cur_len + instruction_len] = IGNORE_INDEX
 
             cur_len += round_len
         target[cur_len:] = IGNORE_INDEX
@@ -809,14 +813,16 @@ def prepare_large_graph_data(training_args):
         data_constructor = nodecls_builder.DataConstructor(
             task_name=training_args.task_name,
             modalities=training_args.modal_type,
-            save_path=training_args.init_data_dir
+            save_path=training_args.init_data_dir,
+            layout_aug=training_args.layout_aug
         )
 
     elif training_args.task_type == "LINKPRED":
         data_constructor = linkpred_builder.DataConstructor(
             task_name=training_args.task_name,
             modalities=training_args.modal_type,
-            save_path=training_args.init_data_dir
+            save_path=training_args.init_data_dir,
+            layout_aug=training_args.layout_aug
         )
     else:
         raise NotImplementedError("Do not support this task.")
@@ -834,14 +840,16 @@ class UpdateDatasetCallback(TrainerCallback):
             data_constructor = nodecls_builder.DataConstructor(
                 task_name=args.task_name,
                 modalities=args.modal_type,
-                save_path=args.init_data_dir
+                save_path=args.init_data_dir,
+                layout_aug=args.layout_aug
             )
             data_constructor.construct_json(data_split="train")
         elif args.task_type == "LINKPRED":
             data_constructor = linkpred_builder.DataConstructor(
                 task_name=args.task_name,
                 modalities=args.modal_type,
-                save_path=args.init_data_dir
+                save_path=args.init_data_dir,
+                layout_aug=args.layout_aug
             )
             data_constructor.construct_json(data_split="train")
 

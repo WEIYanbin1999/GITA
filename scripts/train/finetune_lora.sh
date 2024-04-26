@@ -11,6 +11,7 @@ LORAALPHA=$8  # The scaling factor that controls the magnitude of the low-rank a
 MODALTYPE=$9  # Text_Only, Vision_Only, Vision_Text (both image and text)
 TASKTYPE=${10}  # GITQA-BASE, GITQA-AUGET, GITQA-AUGLY, GITQA-AUGNO, GITQA-AUGNS; NODECLS; LINKPRED
 UNFREEZEV=${11}  # Optional: Fine-tune vision tower or not when Vision_Only or Vision_Text. If True, yes. (default: True)
+LAYOUTAUG=${12}  # Optional: Execute layout augmentation when training large graph data or not when Vision_Only or Vision_Text. (default: True)
 
 
 wandb offline
@@ -65,7 +66,7 @@ elif [[ "$MODALTYPE" == "Vision_Only" || "$MODALTYPE" == "Vision_Text" ]]; then
     pretrained_model_path="../local_llm/llava-v1.5-${MODELSIZE}"
     parent_dir="../dataset/${TASKTYPE}"
 
-    checkpoint_path="./checkpoints/${MODALTYPE}/${TASKTYPE}/${TASK}/llava-v1.5-${MODELSIZE}-lora(${LORAR}, ${LORAALPHA})-unfreeze_vit-${UNFREEZEV}-epoch-${EPOCH}"
+    checkpoint_path="./checkpoints/${MODALTYPE}/${TASKTYPE}/${TASK}/llava-v1.5-${MODELSIZE}-lora(${LORAR}, ${LORAALPHA})-unfreeze_vit-${UNFREEZEV}-layout_aug-${LAYOUTAUG}-epoch-${EPOCH}"
 
     if [ -f "$checkpoint_path/adapter_config.json" ]; then
         echo "Checkpoint file already exist!!!"
@@ -81,6 +82,7 @@ elif [[ "$MODALTYPE" == "Vision_Only" || "$MODALTYPE" == "Vision_Text" ]]; then
             --task_name "$TASK" \
             --modal_type "$MODALTYPE" \
             --data_path "$data_path" \
+            --layout_aug "$LAYOUTAUG" \
             --vision_tower openai/clip-vit-large-patch14-336 \
             --unfreeze_mm_vision_tower "$UNFREEZEV" \
             --mm_projector_type mlp2x_gelu \

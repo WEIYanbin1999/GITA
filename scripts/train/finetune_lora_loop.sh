@@ -1,7 +1,8 @@
 #!/bin/bash
 
 gpu_ids=(
-    "6,7"
+    "0,1,2,3"
+    "4,5,6,7"
 )
 
 declare -a hyper_1=(
@@ -16,16 +17,17 @@ declare -a hyper_1=(
 #    "CiteSeer"
 #    "Cora"
 #    "email-Eu-core"
+#    "PolBlogs"
 
 #    "ca-GrQc"
 #    "ca-HepTh"
 )
 
 declare -a hyper_2=(
-    "7b 5 64 64 16 Vision_Only GITQA-BASE True"
-    "7b 10 64 64 16 Vision_Only GITQA-BASE True"
-    "7b 5 64 64 16 Vision_Only GITQA-BASE False"
-    "7b 10 64 64 16 Vision_Only GITQA-BASE False"
+    "7b 5 64 64 16 Vision_Only GITQA-BASE True False"
+    "7b 10 64 64 16 Vision_Only GITQA-BASE True False"
+    "7b 5 64 64 16 Vision_Only GITQA-BASE False False"
+    "7b 10 64 64 16 Vision_Only GITQA-BASE False False"
 )
 
 declare -a params=()

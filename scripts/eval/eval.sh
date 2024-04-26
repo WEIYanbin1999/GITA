@@ -8,6 +8,7 @@ TESTTYPE=$7  # fine-tuned or zero-shot, default: fine-tuned
 MODALTYPE=$8  # Text_Only, Vision_Only, Vision_Text (both image and text)
 DATATYPE=$9  # GITQA-BASE, GITQA-AUGET, GITQA-AUGLY, GITQA-AUGNO, GITQA-AUGNS; NODECLS; LINKPRED
 UNFREEZEV=${10}  # Optional: Fine-tune vision tower or not when Vision_Only or Vision_Text. If True, yes. (default: True)
+LAYOUTAUG=${11}  # Optional: Execute layout augmentation when training large graph data or not when Vision_Only or Vision_Text. (default: True)
 
 
 if [[ "$DATATYPE" == *"GITQA"* ]]; then
@@ -40,8 +41,8 @@ elif [[ "$MODALTYPE" == *"Vision"* ]]; then
     pretrained_model_path="../local_llm/llava-v1.5-${MODELSIZE}"
 
     if [ "$TESTTYPE" == "fine-tuned" ]; then
-        answer_path="./answer/${MODALTYPE}/${DATATYPE}/${TASK}/llava-v1.5-${MODELSIZE}-lora(${LORAR}, ${LORAALPHA})-epoch-${EPOCH}-unfreeze_vit-${UNFREEZEV}-answer.jsonl"
-        checkpoint_path="./checkpoints/${MODALTYPE}/${DATATYPE}/${TASK}/llava-v1.5-${MODELSIZE}-lora(${LORAR}, ${LORAALPHA})-unfreeze_vit-${UNFREEZEV}-epoch-${EPOCH}"
+        answer_path="./answer/${MODALTYPE}/${DATATYPE}/${TASK}/llava-v1.5-${MODELSIZE}-lora(${LORAR}, ${LORAALPHA})-unfreeze_vit-${UNFREEZEV}-layout_aug-${LAYOUTAUG}-epoch-${EPOCH}-answer.jsonl"
+        checkpoint_path="./checkpoints/${MODALTYPE}/${DATATYPE}/${TASK}/llava-v1.5-${MODELSIZE}-lora(${LORAR}, ${LORAALPHA})-unfreeze_vit-${UNFREEZEV}-layout_aug-${LAYOUTAUG}-epoch-${EPOCH}"
     else
         answer_path="./answer/${MODALTYPE}/${DATATYPE}/${TASK}/llava-v1.5-${MODELSIZE}-zero-shot-answer.jsonl"
         checkpoint_path="$pretrained_model_path"
