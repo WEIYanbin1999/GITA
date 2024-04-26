@@ -20,14 +20,15 @@ import logging
 import pathlib
 import typing
 import os
+import torch
 
 from deepspeed import zero
 from deepspeed.runtime.zero.partition_parameters import ZeroParamStatus
 from peft import LoraConfig, get_peft_model, prepare_model_for_kbit_training
 import transformers
+from transformers.trainer_callback import TrainerCallback
 from transformers import Trainer, BitsAndBytesConfig, deepspeed
-import torch
-import pdb
+from typing import Optional
 
 from fastchat.train.train import (
     DataArguments,
@@ -39,18 +40,28 @@ from fastchat.train.llama_flash_attn_monkey_patch import (
     replace_llama_attn_with_flash_attn,
 )
 
+import nodecls_builder
+import linkpred_builder
+
 
 @dataclass
 class TrainingArguments(transformers.TrainingArguments):
     cache_dir: typing.Optional[str] = field(default=None)
     optim: str = field(default="adamw_torch")
+    flash_attn: bool = False
     model_max_length: int = field(
         default=512,
         metadata={
             "help": "Maximum sequence length. Sequences will be right padded (and possibly truncated)."
         },
     )
-    flash_attn: bool = False
+    init_data_dir: Optional[str] = field(
+        default="../datset/NODECLS",
+        metadata={
+            "help":
+                "The parent directory for initially generate large graph data."
+        }
+    )
 
 
 @dataclass
@@ -102,19 +113,63 @@ def get_peft_state_maybe_zero_3(named_params, bias):
     return to_return
 
 
+def prepare_large_graph_data(training_args):
+    # Initialization: Generate all the data once for training and testing
+    if training_args.task_type == "NODECLS":
+        data_constructor = nodecls_builder.DataConstructor(
+            task_name=training_args.task_name,
+            modalities=training_args.modal_type,
+            save_path=training_args.init_data_dir
+        )
+
+    elif training_args.task_type == "LINKPRED":
+        data_constructor = linkpred_builder.DataConstructor(
+            task_name=training_args.task_name,
+            modalities=training_args.modal_type,
+            save_path=training_args.init_data_dir
+        )
+    else:
+        raise NotImplementedError("Do not support this task.")
+
+    data_constructor.construct_json(data_split="train")
+    data_constructor.construct_json(data_split="test")
+
+
+class UpdateDatasetCallback(TrainerCallback):
+    """
+    Event called at the end of an epoch during training.
+    """
+    def on_epoch_end(self, args, state, control, **kwargs):
+        # update dataset for each epoch during training
+        if args.task_type == "NODECLS":
+            data_constructor = nodecls_builder.DataConstructor(
+                task_name=args.task_name,
+                modalities=args.modal_type,
+                save_path=args.init_data_dir
+            )
+            data_constructor.construct_json(data_split="train")
+        elif args.task_type == "LINKPRED":
+            data_constructor = linkpred_builder.DataConstructor(
+                task_name=args.task_name,
+                modalities=args.modal_type,
+                save_path=args.init_data_dir
+            )
+            data_constructor.construct_json(data_split="train")
+
+
 def train():
     parser = transformers.HfArgumentParser(
         (ModelArguments, DataArguments, TrainingArguments, LoraArguments)
     )
-    (
-        model_args,
-        data_args,
-        training_args,
-        lora_args,
-    ) = parser.parse_args_into_dataclasses()
+    (model_args, data_args, training_args, lora_args) = parser.parse_args_into_dataclasses()
 
     if training_args.flash_attn:
         replace_llama_attn_with_flash_attn()
+
+    # Initialize large graph data if not exist
+    if training_args.task_type in ["NODECLS", "LINKPRED"]:
+        training_args.init_data_dir = data_args.parent_dir
+        prepare_large_graph_data(training_args)
 
     device_map = None
     world_size = int(os.environ.get("WORLD_SIZE", 1))
@@ -188,8 +243,12 @@ def train():
 
     data_module = make_supervised_data_module(tokenizer=tokenizer, data_args=data_args)
     trainer = Trainer(
-        model=model, tokenizer=tokenizer, args=training_args, **data_module
+        model=model,
+        tokenizer=tokenizer,
+        args=training_args,
+        **data_module
     )
+    trainer.add_callback(UpdateDatasetCallback)
 
     model.config.use_cache = False
 

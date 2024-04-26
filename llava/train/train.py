@@ -41,6 +41,7 @@ from PIL import Image
 from torch.backends import cudnn
 
 import nodecls_builder
+import linkpred_builder
 
 local_rank = None
 
@@ -71,8 +72,8 @@ class DataArguments:
                            metadata={"help": "Path to the training data."})
     lazy_preprocess: bool = False
     is_multimodal: bool = False
-    parent_dir: Optional[str] = field(default=None)
     image_aspect_ratio: str = 'square'
+    parent_dir: str = field(default="../datset/GITQA-BASE")
 
 
 @dataclass
@@ -85,8 +86,14 @@ class TrainingArguments(transformers.TrainingArguments):
     task_name: str = field(default="cycle")
     task_type: str = field(default="GITQA-BASE")
     modal_type: str = field(default="Vision_Only")
-    parent_dir: str = field(default="../datset/GITQA-BASE")
     mpt_attn_impl: Optional[str] = field(default="triton")
+    init_data_dir: Optional[str] = field(
+        default="../datset/NODECLS",
+        metadata={
+            "help":
+            "The parent directory for initially generate large graph data."
+        }
+    )
     model_max_length: int = field(
         default=512,
         metadata={
@@ -441,7 +448,8 @@ def preprocess_v1(
     # Tokenize conversations
 
     if has_image:
-        input_ids = torch.stack([tokenizer_image_token(prompt, tokenizer, return_tensors='pt') for prompt in conversations], dim=0)
+        input_ids = torch.stack([tokenizer_image_token(prompt, tokenizer, return_tensors='pt')
+                                 for prompt in conversations], dim=0)
     else:
         input_ids = tokenizer(
             conversations,
@@ -795,18 +803,47 @@ def log_parameters_size(model):
     })
 
 
-class MyCallback(TrainerCallback):
+def prepare_large_graph_data(training_args):
+    # Initialization: Generate all the data once for training and testing
+    if training_args.task_type == "NODECLS":
+        data_constructor = nodecls_builder.DataConstructor(
+            task_name=training_args.task_name,
+            modalities=training_args.modal_type,
+            save_path=training_args.init_data_dir
+        )
+
+    elif training_args.task_type == "LINKPRED":
+        data_constructor = linkpred_builder.DataConstructor(
+            task_name=training_args.task_name,
+            modalities=training_args.modal_type,
+            save_path=training_args.init_data_dir
+        )
+    else:
+        raise NotImplementedError("Do not support this task.")
+
+    data_constructor.construct_json(data_split="train")
+    data_constructor.construct_json(data_split="test")
+
+
+class UpdateDatasetCallback(TrainerCallback):
     """
     Event called at the end of an epoch during training.
     """
     def on_epoch_end(self, args, state, control, **kwargs):
+        # update dataset for each epoch during training
         if args.task_type == "NODECLS":
             data_constructor = nodecls_builder.DataConstructor(
                 task_name=args.task_name,
                 modalities=args.modal_type,
-                save_path=args.parent_dir
+                save_path=args.init_data_dir
             )
-            # update dataset for each epoch during training
+            data_constructor.construct_json(data_split="train")
+        elif args.task_type == "LINKPRED":
+            data_constructor = linkpred_builder.DataConstructor(
+                task_name=args.task_name,
+                modalities=args.modal_type,
+                save_path=args.init_data_dir
+            )
             data_constructor.construct_json(data_split="train")
 
 
@@ -820,6 +857,11 @@ def train():
     model_args, data_args, training_args = parser.parse_args_into_dataclasses()
     local_rank = training_args.local_rank
     compute_dtype = (torch.float16 if training_args.fp16 else (torch.bfloat16 if training_args.bf16 else torch.float32))
+
+    # Initialize large graph data if not exist
+    if training_args.task_type in ["NODECLS", "LINKPRED"]:
+        training_args.init_data_dir = data_args.parent_dir
+        prepare_large_graph_data(training_args)
 
     bnb_model_from_pretrained_args = {}
     if training_args.bits in [4, 8]:
@@ -951,8 +993,6 @@ def train():
         model.config.unfreeze_mm_vision_tower = training_args.unfreeze_mm_vision_tower
         model.config.freeze_mm_mlp_adapter = training_args.freeze_mm_mlp_adapter
 
-        training_args.parent_dir = data_args.parent_dir
-
         # default: false
         if model_args.tune_mm_mlp_adapter:
             model.requires_grad_(False)
@@ -990,12 +1030,7 @@ def train():
                     if training_args.bf16 and module.weight.dtype == torch.float32:
                         module = module.to(torch.bfloat16)
 
-    data_module = make_supervised_data_module(tokenizer=tokenizer,
-                                              data_args=data_args)
-
-    # for name, param in model.named_parameters():
-    #     if param.requires_grad:
-    #         print(name)
+    data_module = make_supervised_data_module(tokenizer=tokenizer, data_args=data_args)
 
     trainer = LLaVATrainer(
         model=model,
@@ -1003,6 +1038,7 @@ def train():
         args=training_args,
         **data_module
     )
+    trainer.add_callback(UpdateDatasetCallback)
 
     if list(pathlib.Path(training_args.output_dir).glob("checkpoint-*")):
         trainer.train(resume_from_checkpoint=True)
