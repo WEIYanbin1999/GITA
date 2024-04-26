@@ -822,7 +822,6 @@ def prepare_large_graph_data(training_args):
         raise NotImplementedError("Do not support this task.")
 
     data_constructor.construct_json(data_split="train")
-    data_constructor.construct_json(data_split="test")
 
 
 class UpdateDatasetCallback(TrainerCallback):
