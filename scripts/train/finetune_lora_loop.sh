@@ -1,13 +1,13 @@
 #!/bin/bash
 
 gpu_ids=(
-    "5,7"
+    "6,7"
 )
 
 declare -a hyper_1=(
+    "hamilton"
     "cycle"
     "flow"
-    "hamilton"
     "matching"
     "shortest_path"
     "topology"
@@ -23,10 +23,10 @@ declare -a hyper_1=(
 )
 
 declare -a hyper_2=(
-    "7b 5 64 64 16 Vision_Only GITQA-BASE True False"
-    "7b 10 64 64 16 Vision_Only GITQA-BASE True False"
-    "7b 5 64 64 16 Vision_Only GITQA-BASE False False"
-    "7b 10 64 64 16 Vision_Only GITQA-BASE False False"
+    "7b 5 64 64 16 Vision_Text GITQA-BASE True False"
+    "7b 10 64 64 16 Vision_Text GITQA-BASE True False"
+    "7b 5 64 64 16 Vision_Text GITQA-BASE False False"
+    "7b 10 64 64 16 Vision_Text GITQA-BASE False False"
 )
 
 declare -a params=()
