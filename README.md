@@ -2,7 +2,7 @@
 
 ## Install
 ```bash
-conda create -n gitq python=3.10 -y
+conda create -n gita python=3.10 -y
 conda activate gita
 pip install --upgrade pip  # enable PEP 660 support
 pip install -e .

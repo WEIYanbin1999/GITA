@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "gita"
-version = "1.1.1"
+version = "1.1.2"
 description = "A language and visual assistant for graph reasoning."
 readme = "README.md"
 requires-python = ">=3.8"
