@@ -2,8 +2,8 @@
 
 ## Install
 ```bash
-conda create -n gitqa python=3.10 -y
-conda activate gitqa
+conda create -n gitq python=3.10 -y
+conda activate gita
 pip install --upgrade pip  # enable PEP 660 support
 pip install -e .
 pip install -e ".[train]"
