@@ -15,6 +15,12 @@ LAYOUTAUG=${12}  # Optional: Execute layout augmentation when training large gra
 
 
 wandb offline
+if [[ "$TASKTYPE" == *"GITQA"* ]]; then
+    data_path="../dataset/${TASKTYPE}/data/${TASK}/QA/${MODALTYPE}_train.json"
+else
+    # i.e. NODECLS or LINKPRED
+    data_path="../dataset/${TASKTYPE}/data/${TASK}/${MODALTYPE}_train.json"
+fi
 
 gpu_count=$(echo "$GPU_IDS" | tr ',' '\n' | wc -l)
 gradient_accumulation_steps=$((128 / "$BSZ" / "$gpu_count"))
@@ -22,13 +28,6 @@ gradient_accumulation_steps=$((128 / "$BSZ" / "$gpu_count"))
 if [ "$MODALTYPE" == "Text_Only" ]; then
     pretrained_model_path="../local_llm/vicuna-v1.5-${MODELSIZE}"
     checkpoint_path="./checkpoints/${MODALTYPE}/${TASKTYPE}/${TASK}/vicuna-v1.5-${MODELSIZE}-lora(${LORAR}, ${LORAALPHA})-epoch-${EPOCH}"
-
-    if [[ "$TASKTYPE" == *"GITQA"* ]]; then
-        data_path="../dataset/${TASKTYPE}/data/${TASK}/QA/${MODALTYPE}_train.json"
-    else
-        # i.e. NODECLS or LINKPRED
-        data_path="../dataset/${TASKTYPE}/data/${TASK}/${MODALTYPE}_train.json"
-    fi
 
     if [ -f "$checkpoint_path/adapter_config.json" ]; then
         echo "Checkpoint file already exist!!!"
@@ -67,14 +66,10 @@ elif [[ "$MODALTYPE" == "Vision_Only" || "$MODALTYPE" == "Vision_Text" ]]; then
     parent_dir="../dataset/${TASKTYPE}"
 
     if [[ "$TASKTYPE" == *"GITQA"* ]]; then
-        data_path="../dataset/${TASKTYPE}/data/${TASK}/QA/${MODALTYPE}_train.json"
         checkpoint_path="./checkpoints/${MODALTYPE}/${TASKTYPE}/${TASK}/llava-v1.5-${MODELSIZE}-lora(${LORAR}, ${LORAALPHA})-unfreeze_vit-${UNFREEZEV}-epoch-${EPOCH}"
     else
-        # i.e. NODECLS or LINKPRED
-        data_path="../dataset/${TASKTYPE}/data/${TASK}/${MODALTYPE}_train.json"
         checkpoint_path="./checkpoints/${MODALTYPE}/${TASKTYPE}/${TASK}/llava-v1.5-${MODELSIZE}-lora(${LORAR}, ${LORAALPHA})-unfreeze_vit-${UNFREEZEV}-layout_aug-${LAYOUTAUG}-epoch-${EPOCH}"
     fi
-
 
     if [ -f "$checkpoint_path/adapter_config.json" ]; then
         echo "Checkpoint file already exist!!!"

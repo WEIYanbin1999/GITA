@@ -23,30 +23,30 @@ declare -a hyper_1=(
 )
 
 declare -a hyper_2=(
-    "7b 5 64 64 16 Vision_Text GITQA-BASE True False"
-    "7b 10 64 64 16 Vision_Text GITQA-BASE True False"
-    "7b 5 64 64 16 Vision_Text GITQA-BASE False False"
-    "7b 10 64 64 16 Vision_Text GITQA-BASE False False"
+    "7b 5 32 64 16 Vision_Text GITQA-BASE True False"
+    "7b 10 32 64 16 Vision_Text GITQA-BASE True False"
+    "7b 5 32 64 16 Vision_Text GITQA-BASE False False"
+    "7b 10 32 64 16 Vision_Text GITQA-BASE False False"
 )
 
 declare -a params=()
 
 for h1 in "${hyper_1[@]}"; do
-      for h2 in "${hyper_2[@]}"; do
-            params+=("${h1} ${h2}")
-      done
+    for h2 in "${hyper_2[@]}"; do
+        params+=("${h1} ${h2}")
+    done
 done
 
 for gpu_index in "${!gpu_ids[@]}"; do
-      gpu_id=${gpu_ids[$gpu_index]}
-      start_index=$(("$gpu_index" * ${#params[@]} / ${#gpu_ids[@]}))
-      end_index=$((("$gpu_index" + 1) * ${#params[@]} / ${#gpu_ids[@]}))
+    gpu_id=${gpu_ids[$gpu_index]}
+    start_index=$(("$gpu_index" * ${#params[@]} / ${#gpu_ids[@]}))
+    end_index=$((("$gpu_index" + 1) * ${#params[@]} / ${#gpu_ids[@]}))
 
-      for task_index in $(seq $start_index $((end_index - 1))); do
-            random_port=$(shuf -i 10000-50000 -n 1)
-            bash ./scripts/train/finetune_lora.sh $gpu_id $random_port ${params[$task_index]} &
-            wait $!
-      done &
+    for task_index in $(seq $start_index $((end_index - 1))); do
+        random_port=$(shuf -i 10000-50000 -n 1)
+        bash ./scripts/train/finetune_lora.sh $gpu_id $random_port ${params[$task_index]} &
+        wait $!
+    done &
 done
 
 wait

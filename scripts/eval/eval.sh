@@ -6,26 +6,26 @@ LORAR=$5  # optional: none; the rank of the low-rank matrices used in the LoRA a
 LORAALPHA=$6  # optional: none; the scaling factor that controls the magnitude of the low-rank adaptation (default: 16)
 TESTTYPE=$7  # fine-tuned or zero-shot, default: fine-tuned
 MODALTYPE=$8  # Text_Only, Vision_Only, Vision_Text (both image and text)
-DATATYPE=$9  # GITQA-BASE, GITQA-AUGET, GITQA-AUGLY, GITQA-AUGNO, GITQA-AUGNS; NODECLS; LINKPRED
+TASKTYPE=$9  # GITQA-BASE, GITQA-AUGET, GITQA-AUGLY, GITQA-AUGNO, GITQA-AUGNS; NODECLS; LINKPRED
 UNFREEZEV=${10}  # Optional: Fine-tune vision tower or not when Vision_Only or Vision_Text. If True, yes. (default: True)
 LAYOUTAUG=${11}  # Optional: Execute layout augmentation when training large graph data or not when Vision_Only or Vision_Text. (default: True)
 
 
-if [[ "$DATATYPE" == *"GITQA"* ]]; then
-    data_path="../dataset/${DATATYPE}/data/${TASK}/QA/${MODALTYPE}_test.json"
+if [[ "$TASKTYPE" == *"GITQA"* ]]; then
+    data_path="../dataset/${TASKTYPE}/data/${TASK}/QA/${MODALTYPE}_test.json"
 else
     # i.e. NODECLS or LINKPRED
-    data_path="../dataset/${DATATYPE}/data/${TASK}/${MODALTYPE}_test.json"
+    data_path="../dataset/${TASKTYPE}/data/${TASK}/${MODALTYPE}_test.json"
 fi
 
 if [ "$MODALTYPE" == "Text_Only" ]; then
     pretrained_model_path="../local_llm/vicuna-v1.5-${MODELSIZE}"
-    checkpoint_path="./checkpoints/${MODALTYPE}/${DATATYPE}/${TASK}/vicuna-v1.5-${MODELSIZE}-lora(${LORAR}, ${LORAALPHA})-epoch-${EPOCH}"
+    checkpoint_path="./checkpoints/${MODALTYPE}/${TASKTYPE}/${TASK}/vicuna-v1.5-${MODELSIZE}-lora(${LORAR}, ${LORAALPHA})-epoch-${EPOCH}"
 
     if [ "$TESTTYPE" == "fine-tuned" ]; then
-        answer_path="./answer/${MODALTYPE}/${DATATYPE}/${TASK}/vicuna-v1.5-${MODELSIZE}-lora(${LORAR}, ${LORAALPHA})-epoch-${EPOCH}-answer.jsonl"
+        answer_path="./answer/${MODALTYPE}/${TASKTYPE}/${TASK}/vicuna-v1.5-${MODELSIZE}-lora(${LORAR}, ${LORAALPHA})-epoch-${EPOCH}-answer.jsonl"
     else
-        answer_path="./answer/${MODALTYPE}/${DATATYPE}/${TASK}/vicuna-v1.5-${MODELSIZE}-zero-shot-answer.jsonl"
+        answer_path="./answer/${MODALTYPE}/${TASKTYPE}/${TASK}/vicuna-v1.5-${MODELSIZE}-zero-shot-answer.jsonl"
     fi
 
     CUDA_VISIBLE_DEVICES=${GPU_IDS} \
@@ -41,10 +41,15 @@ elif [[ "$MODALTYPE" == *"Vision"* ]]; then
     pretrained_model_path="../local_llm/llava-v1.5-${MODELSIZE}"
 
     if [ "$TESTTYPE" == "fine-tuned" ]; then
-        answer_path="./answer/${MODALTYPE}/${DATATYPE}/${TASK}/llava-v1.5-${MODELSIZE}-lora(${LORAR}, ${LORAALPHA})-unfreeze_vit-${UNFREEZEV}-layout_aug-${LAYOUTAUG}-epoch-${EPOCH}-answer.jsonl"
-        checkpoint_path="./checkpoints/${MODALTYPE}/${DATATYPE}/${TASK}/llava-v1.5-${MODELSIZE}-lora(${LORAR}, ${LORAALPHA})-unfreeze_vit-${UNFREEZEV}-layout_aug-${LAYOUTAUG}-epoch-${EPOCH}"
+        if [[ "$TASKTYPE" == *"GITQA"* ]]; then
+            answer_path="./answer/${MODALTYPE}/${TASKTYPE}/${TASK}/llava-v1.5-${MODELSIZE}-lora(${LORAR}, ${LORAALPHA})-unfreeze_vit-${UNFREEZEV}-epoch-${EPOCH}-answer.jsonl"
+            checkpoint_path="./checkpoints/${MODALTYPE}/${TASKTYPE}/${TASK}/llava-v1.5-${MODELSIZE}-lora(${LORAR}, ${LORAALPHA})-unfreeze_vit-${UNFREEZEV}-epoch-${EPOCH}"
+        else
+            answer_path="./answer/${MODALTYPE}/${TASKTYPE}/${TASK}/llava-v1.5-${MODELSIZE}-lora(${LORAR}, ${LORAALPHA})-unfreeze_vit-${UNFREEZEV}-layout_aug-${LAYOUTAUG}-epoch-${EPOCH}-answer.jsonl"
+            checkpoint_path="./checkpoints/${MODALTYPE}/${TASKTYPE}/${TASK}/llava-v1.5-${MODELSIZE}-lora(${LORAR}, ${LORAALPHA})-unfreeze_vit-${UNFREEZEV}-layout_aug-${LAYOUTAUG}-epoch-${EPOCH}"
+        fi
     else
-        answer_path="./answer/${MODALTYPE}/${DATATYPE}/${TASK}/llava-v1.5-${MODELSIZE}-zero-shot-answer.jsonl"
+        answer_path="./answer/${MODALTYPE}/${TASKTYPE}/${TASK}/llava-v1.5-${MODELSIZE}-zero-shot-answer.jsonl"
         checkpoint_path="$pretrained_model_path"
     fi
 
