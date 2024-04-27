@@ -866,7 +866,7 @@ def train():
     compute_dtype = (torch.float16 if training_args.fp16 else (torch.bfloat16 if training_args.bf16 else torch.float32))
 
     # Initialize large graph data if not exist
-    if training_args.task_type in ["NODECLS", "LINKPRED"]:
+    if training_args.local_rank == 0 and training_args.task_type in ["NODECLS", "LINKPRED"]:
         training_args.init_data_dir = data_args.parent_dir
         prepare_large_graph_data(training_args)
 
