@@ -836,22 +836,23 @@ class UpdateDatasetCallback(TrainerCallback):
     """
     def on_epoch_end(self, args, state, control, **kwargs):
         # update dataset for each epoch during training
-        if args.task_type == "NODECLS":
-            data_constructor = nodecls_builder.DataConstructor(
-                task_name=args.task_name,
-                modalities=args.modal_type,
-                save_path=args.init_data_dir,
-                layout_aug=args.layout_aug
-            )
-            data_constructor.construct_json(data_split="train")
-        elif args.task_type == "LINKPRED":
-            data_constructor = linkpred_builder.DataConstructor(
-                task_name=args.task_name,
-                modalities=args.modal_type,
-                save_path=args.init_data_dir,
-                layout_aug=args.layout_aug
-            )
-            data_constructor.construct_json(data_split="train")
+        if args.local_rank == 0:
+            if args.task_type == "NODECLS":
+                data_constructor = nodecls_builder.DataConstructor(
+                    task_name=args.task_name,
+                    modalities=args.modal_type,
+                    save_path=args.init_data_dir,
+                    layout_aug=args.layout_aug
+                )
+                data_constructor.construct_json(data_split="train")
+            elif args.task_type == "LINKPRED":
+                data_constructor = linkpred_builder.DataConstructor(
+                    task_name=args.task_name,
+                    modalities=args.modal_type,
+                    save_path=args.init_data_dir,
+                    layout_aug=args.layout_aug
+                )
+                data_constructor.construct_json(data_split="train")
 
 
 def train():
