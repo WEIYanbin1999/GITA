@@ -22,10 +22,10 @@ declare -a hyper_1=(
 )
 
 declare -a hyper_2=(
-    "7b none none none zero-shot Vision_Only GITQA-BASE none none"
-    "7b none none none zero-shot Vision_Text GITQA-BASE none none"
-    "13b none none none zero-shot Vision_Only GITQA-BASE none none"
-    "13b none none none zero-shot Vision_Text GITQA-BASE none none"
+    "7b none none none zero-shot Text_Only GITQA-BASE none none"
+    "7b none none none zero-shot Text_Only GITQA-BASE none none"
+    "13b none none none zero-shot Text_Only GITQA-BASE none none"
+    "13b none none none zero-shot Text_Only GITQA-BASE none none"
 #    "7b 5 64 16 fine-tuned Vision_Only GITQA-BASE True False"
 #    "7b 5 64 16 fine-tuned Vision_Only GITQA-BASE False False"
 )
@@ -51,5 +51,4 @@ done
 
 wait
 echo "Training process has completed!!!"
-#python send_email.py "Training process has completed"
 
