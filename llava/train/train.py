@@ -827,11 +827,9 @@ def prepare_large_graph_data(training_args):
     else:
         raise NotImplementedError("Do not support this task.")
 
-    if training_args.local_rank == 0:
-        data_constructor.construct_json(data_split="train")
-    if training_args.local_rank == 0 and not os.path.isfile(os.path.join(training_args.init_data_dir,
-                                                                         "data", training_args.task_name,
-                                                                         f"{training_args.modal_type}_test.json")):
+    data_constructor.construct_json(data_split="train")
+    if not os.path.isfile(os.path.join(training_args.init_data_dir, "data", training_args.task_name,
+                          f"{training_args.modal_type}_test.json")):
         data_constructor.construct_json(data_split="test")
 
 
