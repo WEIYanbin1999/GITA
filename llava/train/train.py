@@ -828,6 +828,9 @@ def prepare_large_graph_data(training_args):
         raise NotImplementedError("Do not support this task.")
 
     data_constructor.construct_json(data_split="train")
+    if not os.path.isfile(os.path.join(training_args.init_data_dir, "data", training_args.task_name,
+                                       f"{training_args.modal_type}_test.json")):
+        data_constructor.construct_json(data_split="test")
 
 
 class UpdateDatasetCallback(TrainerCallback):
@@ -866,7 +869,7 @@ def train():
     local_rank = training_args.local_rank
     compute_dtype = (torch.float16 if training_args.fp16 else (torch.bfloat16 if training_args.bf16 else torch.float32))
 
-    # Initialize large graph data if not exist
+    # Initialize large graph data
     if training_args.local_rank == 0 and training_args.task_type in ["NODECLS", "LINKPRED"]:
         training_args.init_data_dir = data_args.parent_dir
         prepare_large_graph_data(training_args)
