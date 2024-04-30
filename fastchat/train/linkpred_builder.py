@@ -205,7 +205,8 @@ class Questioner:
     
     
 class DataConstructor:
-    def __init__(self, task_name, modalities='Vision_Text', save_path="./"):
+    def __init__(self, task_name, modalities='Vision_Text', save_path="./", layout_aug=False):
+        self.layout_aug = layout_aug
         self.modalities = modalities
         self.task_name = task_name
         self.save_path = save_path
@@ -309,7 +310,7 @@ class DataConstructor:
                 self.graph_visualizer.convert_graph_to_image(
                     src_node_subgraph_index, dst_node_subgraph_index, subgraph_edge_index,
                     os.path.join(self.save_path, image_path),
-                    'store', False
+                    'store', layout_aug=self.layout_aug
                 )
                 query = self.questioner.generate_vt_query(graph_description, src_node_subgraph_index,
                                                           dst_node_subgraph_index)
@@ -341,24 +342,28 @@ if __name__ == "__main__":
     seed_torch()
     data_constructor = DataConstructor(task_name='ca-GrQc',
                                        modalities='Text_Only',
-                                       save_path="../dataset/LINKPRED")
+                                       save_path="../dataset/LINKPRED",
+                                       layout_aug=False)
     data_constructor.construct_json(data_split="train")
     data_constructor.construct_json(data_split="test")
 
     data_constructor = DataConstructor(task_name='ca-GrQc',
                                        modalities='Vision_Text',
-                                       save_path="../dataset/LINKPRED")
+                                       save_path="../dataset/LINKPRED",
+                                       layout_aug=False)
     data_constructor.construct_json(data_split="train")
     data_constructor.construct_json(data_split="test")
 
     data_constructor = DataConstructor(task_name='ca-HepTh',
                                        modalities='Text_Only',
-                                       save_path="../dataset/LINKPRED")
+                                       save_path="../dataset/LINKPRED",
+                                       layout_aug=False)
     data_constructor.construct_json(data_split="train")
     data_constructor.construct_json(data_split="test")
 
     data_constructor = DataConstructor(task_name='ca-HepTh',
                                        modalities='Vision_Text',
-                                       save_path="../dataset/LINKPRED")
+                                       save_path="../dataset/LINKPRED",
+                                       layout_aug=False)
     data_constructor.construct_json(data_split="train")
     data_constructor.construct_json(data_split="test")

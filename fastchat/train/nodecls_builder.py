@@ -265,7 +265,8 @@ class Questioner(object):
     
     
 class DataConstructor(object):
-    def __init__(self, task_name, modalities='Vision_Text', save_path="./"):
+    def __init__(self, task_name, modalities='Vision_Text', save_path="./", layout_aug=False):
+        self.layout_aug = layout_aug
         self.modalities = modalities
         self.save_path = save_path
         self.task_name = task_name
@@ -319,8 +320,9 @@ class DataConstructor(object):
             if self.modalities == 'Vision_Text':
                 # Save visual graphs to path
                 self.graph_visualizer.convert_graph_to_image(
-                    adjs[0].edge_index, os.path.join(self.save_path, image_path),
-                    node_labels, 'vary', 'light', False
+                    adjs[0].edge_index,
+                    os.path.join(self.save_path, image_path),
+                    node_labels, 'vary', 'light', layout_aug=self.layout_aug
                 )
                 query = self.questioner.generate_vt_query(graph_description)
                 sample['image'] = image_path
@@ -352,48 +354,56 @@ if __name__ == "__main__":
     seed_torch()
     data_constructor = DataConstructor(task_name='Cora',
                                        modalities="Vision_Text",
-                                       save_path="../dataset/NODECLS")
+                                       save_path="../dataset/NODECLS",
+                                       layout_aug=False)
     data_constructor.construct_json(data_split="train")
     data_constructor.construct_json(data_split="test")
 
     data_constructor = DataConstructor(task_name='Cora',
                                        modalities="Text_Only",
-                                       save_path="../dataset/NODECLS")
+                                       save_path="../dataset/NODECLS",
+                                       layout_aug=False)
     data_constructor.construct_json(data_split="train")
     data_constructor.construct_json(data_split="test")
 
     data_constructor = DataConstructor(task_name='CiteSeer',
                                        modalities="Vision_Text",
-                                       save_path="../dataset/NODECLS")
+                                       save_path="../dataset/NODECLS",
+                                       layout_aug=False)
     data_constructor.construct_json(data_split="train")
     data_constructor.construct_json(data_split="test")
 
     data_constructor = DataConstructor(task_name='CiteSeer',
                                        modalities="Text_Only",
-                                       save_path="../dataset/NODECLS")
+                                       save_path="../dataset/NODECLS",
+                                       layout_aug=False)
     data_constructor.construct_json(data_split="train")
     data_constructor.construct_json(data_split="test")
 
     data_constructor = DataConstructor(task_name='PolBlogs',
                                        modalities="Vision_Text",
-                                       save_path="../dataset/NODECLS")
+                                       save_path="../dataset/NODECLS",
+                                       layout_aug=False)
     data_constructor.construct_json(data_split="train")
     data_constructor.construct_json(data_split="test")
 
     data_constructor = DataConstructor(task_name='PolBlogs',
                                        modalities="Text_Only",
-                                       save_path="../dataset/NODECLS")
+                                       save_path="../dataset/NODECLS",
+                                       layout_aug=False)
     data_constructor.construct_json(data_split="train")
     data_constructor.construct_json(data_split="test")
 
     data_constructor = DataConstructor(task_name='email-Eu-core',
                                        modalities="Vision_Text",
-                                       save_path="../dataset/NODECLS")
+                                       save_path="../dataset/NODECLS",
+                                       layout_aug=False)
     data_constructor.construct_json(data_split="train")
     data_constructor.construct_json(data_split="test")
 
     data_constructor = DataConstructor(task_name='email-Eu-core',
                                        modalities="Text_Only",
-                                       save_path="../dataset/NODECLS")
+                                       save_path="../dataset/NODECLS",
+                                       layout_aug=False)
     data_constructor.construct_json(data_split="train")
     data_constructor.construct_json(data_split="test")
