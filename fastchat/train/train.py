@@ -31,9 +31,6 @@ from transformers.trainer_callback import TrainerCallback
 from fastchat.conversation import SeparatorStyle
 from fastchat.model.model_adapter import get_conversation_template
 
-import nodecls_builder
-import linkpred_builder
-
 IGNORE_TOKEN_ID = LabelSmoother.ignore_index
 
 
@@ -66,15 +63,6 @@ class DataArguments:
 class TrainingArguments(transformers.TrainingArguments):
     cache_dir: Optional[str] = field(default=None)
     optim: str = field(default="adamw_torch")
-    task_name: str = field(default="cycle")
-    task_type: str = field(default="GITQA-BASE")
-    modal_type: str = field(default="Vision_Only")
-    init_data_dir: Optional[str] = field(
-        default="../datset/NODECLS",
-        metadata={
-            "help": "The parent directory for initially generate large graph data."
-        }
-    )
     model_max_length: int = field(
         default=512,
         metadata={
@@ -266,57 +254,6 @@ def make_supervised_data_module(
     return dict(train_dataset=train_dataset, eval_dataset=eval_dataset)
 
 
-def prepare_large_graph_data(training_args):
-    # Initialization: Generate all the data once for training and testing
-    if training_args.task_type == "NODECLS":
-        data_constructor = nodecls_builder.DataConstructor(
-            task_name=training_args.task_name,
-            modalities=training_args.modal_type,
-            save_path=training_args.init_data_dir,
-            layout_aug=training_args.layout_aug
-        )
-
-    elif training_args.task_type == "LINKPRED":
-        data_constructor = linkpred_builder.DataConstructor(
-            task_name=training_args.task_name,
-            modalities=training_args.modal_type,
-            save_path=training_args.init_data_dir,
-            layout_aug=training_args.layout_aug
-        )
-    else:
-        raise NotImplementedError("Do not support this task.")
-
-    data_constructor.construct_json(data_split="train")
-    if not os.path.isfile(os.path.join(training_args.init_data_dir, "data", training_args.task_name,
-                          f"{training_args.modal_type}_test.json")):
-        data_constructor.construct_json(data_split="test")
-
-
-class UpdateDatasetCallback(TrainerCallback):
-    """
-    Event called at the end of an epoch during training.
-    """
-    def on_epoch_end(self, args, state, control, **kwargs):
-        # update dataset for each epoch during training
-        if args.local_rank == 0:
-            if args.task_type == "NODECLS":
-                data_constructor = nodecls_builder.DataConstructor(
-                    task_name=args.task_name,
-                    modalities=args.modal_type,
-                    save_path=args.init_data_dir,
-                    layout_aug=args.layout_aug
-                )
-                data_constructor.construct_json(data_split="train")
-            elif args.task_type == "LINKPRED":
-                data_constructor = linkpred_builder.DataConstructor(
-                    task_name=args.task_name,
-                    modalities=args.modal_type,
-                    save_path=args.init_data_dir,
-                    layout_aug=args.layout_aug
-                )
-                data_constructor.construct_json(data_split="train")
-
-
 def train():
     global local_rank
 
@@ -325,11 +262,6 @@ def train():
     )
     model_args, data_args, training_args = parser.parse_args_into_dataclasses()
     local_rank = training_args.local_rank
-
-    # Initialize large graph data
-    if local_rank == 0 and training_args.task_type in ["NODECLS", "LINKPRED"]:
-        training_args.init_data_dir = data_args.parent_dir
-        prepare_large_graph_data(training_args)
 
     # Set RoPE scaling factor
     config = transformers.AutoConfig.from_pretrained(
@@ -369,7 +301,6 @@ def train():
     trainer = Trainer(
         model=model, tokenizer=tokenizer, args=training_args, **data_module
     )
-    trainer.add_callback(UpdateDatasetCallback)
 
     if list(pathlib.Path(training_args.output_dir).glob("checkpoint-*")):
         trainer.train(resume_from_checkpoint=True)

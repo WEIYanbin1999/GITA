@@ -49,17 +49,19 @@ class TrainingArguments(transformers.TrainingArguments):
     cache_dir: typing.Optional[str] = field(default=None)
     optim: str = field(default="adamw_torch")
     flash_attn: bool = False
+    task_name: str = field(default="cycle")
+    task_type: str = field(default="GITQA-BASE")
+    modal_type: str = field(default="Vision_Only")
+    init_data_dir: Optional[str] = field(
+        default="../datset/NODECLS",
+        metadata={
+            "help": "The parent directory for initially generate large graph data."
+        }
+    )
     model_max_length: int = field(
         default=512,
         metadata={
             "help": "Maximum sequence length. Sequences will be right padded (and possibly truncated)."
-        },
-    )
-    init_data_dir: Optional[str] = field(
-        default="../datset/NODECLS",
-        metadata={
-            "help":
-                "The parent directory for initially generate large graph data."
         }
     )
 
@@ -119,19 +121,24 @@ def prepare_large_graph_data(training_args):
         data_constructor = nodecls_builder.DataConstructor(
             task_name=training_args.task_name,
             modalities=training_args.modal_type,
-            save_path=training_args.init_data_dir
+            save_path=training_args.init_data_dir,
+            layout_aug=training_args.layout_aug
         )
 
     elif training_args.task_type == "LINKPRED":
         data_constructor = linkpred_builder.DataConstructor(
             task_name=training_args.task_name,
             modalities=training_args.modal_type,
-            save_path=training_args.init_data_dir
+            save_path=training_args.init_data_dir,
+            layout_aug=training_args.layout_aug
         )
     else:
         raise NotImplementedError("Do not support this task.")
 
     data_constructor.construct_json(data_split="train")
+    if not os.path.isfile(os.path.join(training_args.init_data_dir, "data", training_args.task_name,
+                          f"{training_args.modal_type}_test.json")):
+        data_constructor.construct_json(data_split="test")
 
 
 class UpdateDatasetCallback(TrainerCallback):
@@ -140,20 +147,23 @@ class UpdateDatasetCallback(TrainerCallback):
     """
     def on_epoch_end(self, args, state, control, **kwargs):
         # update dataset for each epoch during training
-        if args.task_type == "NODECLS":
-            data_constructor = nodecls_builder.DataConstructor(
-                task_name=args.task_name,
-                modalities=args.modal_type,
-                save_path=args.init_data_dir
-            )
-            data_constructor.construct_json(data_split="train")
-        elif args.task_type == "LINKPRED":
-            data_constructor = linkpred_builder.DataConstructor(
-                task_name=args.task_name,
-                modalities=args.modal_type,
-                save_path=args.init_data_dir
-            )
-            data_constructor.construct_json(data_split="train")
+        if args.local_rank == 0:
+            if args.task_type == "NODECLS":
+                data_constructor = nodecls_builder.DataConstructor(
+                    task_name=args.task_name,
+                    modalities=args.modal_type,
+                    save_path=args.init_data_dir,
+                    layout_aug=args.layout_aug
+                )
+                data_constructor.construct_json(data_split="train")
+            elif args.task_type == "LINKPRED":
+                data_constructor = linkpred_builder.DataConstructor(
+                    task_name=args.task_name,
+                    modalities=args.modal_type,
+                    save_path=args.init_data_dir,
+                    layout_aug=args.layout_aug
+                )
+                data_constructor.construct_json(data_split="train")
 
 
 def train():
@@ -165,8 +175,8 @@ def train():
     if training_args.flash_attn:
         replace_llama_attn_with_flash_attn()
 
-    # Initialize large graph data if not exist
-    if training_args.task_type in ["NODECLS", "LINKPRED"]:
+    # Initialize large graph data
+    if training_args.local_rank == 0 and training_args.task_type in ["NODECLS", "LINKPRED"]:
         training_args.init_data_dir = data_args.parent_dir
         prepare_large_graph_data(training_args)
 
