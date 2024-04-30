@@ -1,4 +1,4 @@
-# Rendering Graphs for Graph Reasoning in Multimodal Large Language Models
+# GITA: Graph to Image-Text Assistant for Vision-Language Graph Reasoning
 
 ## Install
 ```bash
