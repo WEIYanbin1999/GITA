@@ -108,11 +108,14 @@ class Evaluation:
 
     def count(self, output, ground_truth, path_id, ques_file_path):
         task = path_id.split("-")[0]
-        task_difficulty = path_id.split("-")[1]
-        graph_id = path_id.split("-")[2]
-        # get graph path from ques_file_path and path_id
-        graph_path = os.path.join("/".join(ques_file_path.split("/")[:4]), task,
-                                  "graph_structure", task_difficulty, graph_id + ".txt")
+        if task not in {("CiteSeer", "Cora", "email-Eu-core", "PolBlogs", "ca-GrQc", "ca-HepTh")}:
+            task_difficulty = path_id.split("-")[1]
+            graph_id = path_id.split("-")[2]
+            # get graph path from ques_file_path and path_id
+            graph_path = os.path.join("/".join(ques_file_path.split("/")[:4]), task,
+                                      "graph_structure", task_difficulty, graph_id + ".txt")
+        else:
+            task_difficulty = None
 
         if self.task == "hamilton":
             candidate = output.split(".")[-1].split(":")[-1].split("->")
@@ -173,13 +176,16 @@ class Evaluation:
             # The answers to other tasks are in the form of xxx.
             if len(output.split(".")) == 2:
                 if output == ground_truth:
-                    self.correct[task_difficulty] += 1
+                    if task_difficulty is not None:
+                        self.correct[task_difficulty] += 1
                     self.correct["average"] += 1
             else:
-                self.irrelevant[task_difficulty] += 1
+                if task_difficulty is not None:
+                    self.irrelevant[task_difficulty] += 1
                 self.irrelevant["average"] += 1
 
-        self.total[task_difficulty] += 1
+        if task_difficulty is not None:
+            self.total[task_difficulty] += 1
         self.total["average"] += 1
         return self.correct, self.irrelevant, self.total
 

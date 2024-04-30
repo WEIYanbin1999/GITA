@@ -41,9 +41,9 @@ def load_model(base_model_path, lora_path, test_type):
 
 class Evaluation:
     def __init__(self, task):
-        self.correct = {"easy": 0, "medium": 0, "hard": 0}
-        self.total = {"easy": 0, "medium": 0, "hard": 0}
-        self.irrelevant = {"easy": 0, "medium": 0, "hard": 0}
+        self.correct = {"easy": 0, "medium": 0, "hard": 0, "average": 0}
+        self.total = {"easy": 0, "medium": 0, "hard": 0, "average": 0}
+        self.irrelevant = {"easy": 0, "medium": 0, "hard": 0, "average": 0}
         self.task = task
 
     @staticmethod
@@ -69,72 +69,87 @@ class Evaluation:
                 return False
         return True
 
-    def count(self, output, ground_truth, path_id, ques_file):
+    def count(self, output, ground_truth, path_id, ques_file_path):
         task = path_id.split("-")[0]
-        task_difficulty = path_id.split("-")[1]
-        graph_id = path_id.split("-")[2]
-        # get graph path from ques_file and path_id
-        graph_path = os.path.join("/".join(ques_file.split("/")[:4]), task,
-                                  "graph_structure", task_difficulty, graph_id + ".txt")
+        if task not in {("CiteSeer", "Cora", "email-Eu-core", "PolBlogs", "ca-GrQc", "ca-HepTh")}:
+            task_difficulty = path_id.split("-")[1]
+            graph_id = path_id.split("-")[2]
+            # get graph path from ques_file_path and path_id
+            graph_path = os.path.join("/".join(ques_file_path.split("/")[:4]), task,
+                                      "graph_structure", task_difficulty, graph_id + ".txt")
+        else:
+            task_difficulty = None
 
-        if self.task == "gnn":
-            if output.startswith("The updated embeddings of each node:"):
-                if output == ground_truth:
+        if self.task == "hamilton":
+            candidate = output.split(".")[-1].split(":")[-1].split("->")
+            if not candidate:
+                candidate = list(map(int, candidate))
+
+                G = nx.Graph()
+                with open(graph_path, "r") as f:
+                    n, m = [int(x) for x in next(f).split()]
+                    array = []
+                    for line in f:  # read rest of lines
+                        array.append([int(x) for x in line.split()])
+                    edges = array[:m]
+                    assert len(edges) == m
+                    G.add_nodes_from(range(n))
+                    for edge in edges:
+                        G.add_edge(edge[0], edge[1])
+
+                if self.is_hamiltonian_path(G=G, path=candidate):
                     self.correct[task_difficulty] += 1
+                    self.correct["average"] += 1
+                else:
+                    self.irrelevant[task_difficulty] += 1
+                    self.irrelevant["average"] += 1
             else:
                 self.irrelevant[task_difficulty] += 1
-
-        elif self.task == "hamilton":
-            candidate = output.split(".")[0].split('->')
-            candidate = list(map(int, candidate))
-
-            G = nx.Graph()
-            with open(graph_path, "r") as f:
-                n, m = [int(x) for x in next(f).split()]
-                array = []
-                for line in f:  # read rest of lines
-                    array.append([int(x) for x in line.split()])
-                edges = array[:m]
-                assert len(edges) == m
-                G.add_nodes_from(range(n))
-                for edge in edges:
-                    G.add_edge(edge[0], edge[1])
-
-            if self.is_hamiltonian_path(G=G, path=candidate):
-                self.correct[task_difficulty] += 1
-            else:
-                self.irrelevant[task_difficulty] += 1
+                self.irrelevant["average"] += 1
 
         elif self.task == "topology":
             candidate = output.split(".")[0].split(',')
-            candidate = list(map(int, candidate))
 
-            G = nx.DiGraph()
-            with open(graph_path, "r") as f:
-                n, m = [int(x) for x in next(f).split()]
-                array = []
-                for line in f:  # read rest of lines
-                    array.append([int(x) for x in line.split()])
-                edges = array[:m]
-                assert len(edges) == m
-                G.add_nodes_from(range(n))
-                for edge in edges:
-                    G.add_edge(edge[0], edge[1])
+            if not candidate:
+                candidate = list(map(int, candidate))
 
-            if self.is_topological_order(G=G, order=candidate):
-                self.correct[task_difficulty] += 1
+                G = nx.DiGraph()
+                with open(graph_path, "r") as f:
+                    n, m = [int(x) for x in next(f).split()]
+                    array = []
+                    for line in f:  # read rest of lines
+                        array.append([int(x) for x in line.split()])
+                    edges = array[:m]
+                    assert len(edges) == m
+                    G.add_nodes_from(range(n))
+                    for edge in edges:
+                        G.add_edge(edge[0], edge[1])
+
+                if self.is_topological_order(G=G, order=candidate):
+                    self.correct[task_difficulty] += 1
+                    self.correct["average"] += 1
+                else:
+                    self.irrelevant[task_difficulty] += 1
+                    self.irrelevant["average"] += 1
             else:
                 self.irrelevant[task_difficulty] += 1
+                self.irrelevant["average"] += 1
 
         else:
             # The answers to other tasks are in the form of xxx.
             if len(output.split(".")) == 2:
                 if output == ground_truth:
-                    self.correct[task_difficulty] += 1
+                    if task_difficulty is not None:
+                        self.correct[task_difficulty] += 1
+                    self.correct["average"] += 1
             else:
-                self.irrelevant[task_difficulty] += 1
+                if task_difficulty is not None:
+                    self.irrelevant[task_difficulty] += 1
+                self.irrelevant["average"] += 1
 
-        self.total[task_difficulty] += 1
+        if task_difficulty is not None:
+            self.total[task_difficulty] += 1
+        self.total["average"] += 1
         return self.correct, self.irrelevant, self.total
 
 
