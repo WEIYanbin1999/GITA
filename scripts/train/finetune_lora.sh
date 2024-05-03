@@ -15,6 +15,8 @@ LAYOUTAUG=${12}  # Optional: Execute layout augmentation when training large gra
 
 
 wandb offline
+
+parent_dir="../dataset/${TASKTYPE}"
 if [[ "$TASKTYPE" == *"GITQA"* ]]; then
     data_path="../dataset/${TASKTYPE}/data/${TASK}/QA/${MODALTYPE}_train.json"
 else
@@ -37,6 +39,10 @@ if [ "$MODALTYPE" == "Text_Only" ]; then
             --lora_r "$LORAR" --lora_alpha "$LORAALPHA" --lora_dropout 0.05 \
             --learning_rate 2e-4 \
             --data_path "$data_path" \
+            --parent_dir "$parent_dir" \
+            --task_type "$TASKTYPE" \
+            --task_name "$TASK" \
+            --modal_type "$MODALTYPE" \
             --output_dir "$checkpoint_path" \
             --num_train_epochs "$EPOCH" \
             --fp16 True \
@@ -63,7 +69,6 @@ if [ "$MODALTYPE" == "Text_Only" ]; then
 
 elif [[ "$MODALTYPE" == "Vision_Only" || "$MODALTYPE" == "Vision_Text" ]]; then
     pretrained_model_path="../local_llm/llava-v1.5-${MODELSIZE}"
-    parent_dir="../dataset/${TASKTYPE}"
 
     if [[ "$TASKTYPE" == *"GITQA"* ]]; then
         checkpoint_path="./checkpoints/${MODALTYPE}/${TASKTYPE}/${TASK}/llava-v1.5-${MODELSIZE}-lora(${LORAR}, ${LORAALPHA})-unfreeze_vit-${UNFREEZEV}-epoch-${EPOCH}"

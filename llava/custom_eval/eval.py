@@ -108,7 +108,7 @@ class Evaluation:
 
     def count(self, output, ground_truth, path_id, ques_file_path):
         task = path_id.split("-")[0]
-        if task not in {("CiteSeer", "Cora", "email-Eu-core", "PolBlogs", "ca-GrQc", "ca-HepTh")}:
+        if task not in {"CiteSeer", "Cora", "email-Eu-core", "PolBlogs", "ca-GrQc", "ca-HepTh"}:
             task_difficulty = path_id.split("-")[1]
             graph_id = path_id.split("-")[2]
             # get graph path from ques_file_path and path_id

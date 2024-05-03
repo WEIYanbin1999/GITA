@@ -1,7 +1,7 @@
 #!/bin/bash
 
 gpu_ids=(
-    "6,7"
+    "0,7"
 )
 
 declare -a hyper_1=(

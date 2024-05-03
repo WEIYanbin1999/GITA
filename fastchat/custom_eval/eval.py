@@ -70,12 +70,11 @@ class Evaluation:
         return True
 
     def count(self, output, ground_truth, path_id, ques_file_path):
-        task = path_id.split("-")[0]
-        if task not in {("CiteSeer", "Cora", "email-Eu-core", "PolBlogs", "ca-GrQc", "ca-HepTh")}:
+        if self.task not in {"CiteSeer", "Cora", "email-Eu-core", "PolBlogs", "ca-GrQc", "ca-HepTh"}:
             task_difficulty = path_id.split("-")[1]
             graph_id = path_id.split("-")[2]
             # get graph path from ques_file_path and path_id
-            graph_path = os.path.join("/".join(ques_file_path.split("/")[:4]), task,
+            graph_path = os.path.join("/".join(ques_file_path.split("/")[:4]), self.task,
                                       "graph_structure", task_difficulty, graph_id + ".txt")
         else:
             task_difficulty = None
@@ -180,7 +179,6 @@ def eval_model(args):
         qs = qa_conv[0]['value']
         gt = qa_conv[1]['value']
         conv = get_conversation_template("vicuna")
-        task = path_id.split("-")[0]
 
         if args.test_type == "zero-shot":
             if args.task in ['cycle', 'connectivity']:
@@ -221,7 +219,7 @@ def eval_model(args):
             output=output,
             ground_truth=gt,
             path_id=path_id,
-            ques_file=args.question_file
+            ques_file_path=args.question_file
         )
 
         ans_file.write(
