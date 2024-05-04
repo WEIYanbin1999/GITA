@@ -177,7 +177,6 @@ def train():
 
     # Initialize large graph data
     if training_args.local_rank == 0 and training_args.task_type in ["NODECLS", "LINKPRED"]:
-        training_args.init_data_dir = data_args.parent_dir
         prepare_large_graph_data(training_args)
 
     device_map = None
