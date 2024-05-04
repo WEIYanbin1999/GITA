@@ -39,6 +39,7 @@ if [ "$MODALTYPE" == "Text_Only" ]; then
             --lora_r "$LORAR" --lora_alpha "$LORAALPHA" --lora_dropout 0.05 \
             --learning_rate 2e-4 \
             --data_path "$data_path" \
+            --init_data_dir "$parent_dir" \
             --task_type "$TASKTYPE" \
             --task_name "$TASK" \
             --modal_type "$MODALTYPE" \

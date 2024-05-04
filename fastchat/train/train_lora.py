@@ -58,6 +58,12 @@ class TrainingArguments(transformers.TrainingArguments):
             "help": "The parent directory for initially generate large graph data."
         }
     )
+    layout_aug: Optional[bool] = field(
+        default=False,
+        metadata={
+            "help": "Execute layout augmentation when training large graph data or not."
+        }
+    )
     model_max_length: int = field(
         default=512,
         metadata={
