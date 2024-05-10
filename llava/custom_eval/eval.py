@@ -107,12 +107,12 @@ class Evaluation:
         return True
 
     def count(self, output, ground_truth, path_id, ques_file_path):
-        task = path_id.split("-")[0]
-        if task not in {"CiteSeer", "Cora", "email-Eu-core", "PolBlogs", "ca-GrQc", "ca-HepTh"}:
+        # task = path_id.split("-")[0]
+        if self.task not in {"CiteSeer", "Cora", "email-Eu-core", "PolBlogs", "ca-GrQc", "ca-HepTh"}:
             task_difficulty = path_id.split("-")[1]
             graph_id = path_id.split("-")[2]
             # get graph path from ques_file_path and path_id
-            graph_path = os.path.join("/".join(ques_file_path.split("/")[:4]), task,
+            graph_path = os.path.join("/".join(ques_file_path.split("/")[:4]), self.task,
                                       "graph_structure", task_difficulty, graph_id + ".txt")
         else:
             task_difficulty = None
@@ -211,6 +211,7 @@ def eval_model(args):
     correct, irrelevant, total = None, None, None
 
     for input_ids, image_tensor, path_id, qs, gt in tqdm(data_loader, total=len(data_loader)):
+        input_ids = input_ids[:, :4050]
         input_ids = input_ids.to(device='cuda', non_blocking=True)
         if isinstance(path_id, tuple):
             path_id = path_id[0]
