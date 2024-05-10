@@ -236,6 +236,7 @@ def eval_model(args):
     ans_file.write(
         json.dumps(
             {
+                "average accuracy": correct["average"] / total["average"],
                 "easy accuracy": correct["easy"] / total["easy"] if total["easy"] else "null",
                 "medium accuracy": correct["medium"] / total["medium"] if total["medium"] else "null",
                 "hard accuracy": correct["hard"] / total["hard"] if total["hard"] else "null",
