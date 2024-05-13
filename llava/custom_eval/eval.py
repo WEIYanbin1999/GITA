@@ -174,7 +174,7 @@ class Evaluation:
 
         else:
             # The answers to other tasks are in the form of xxx.
-            if len(output.split(".")) == 2:
+            if len(output.split(".")) == 2 or (output.isdigit() and ground_truth.isdigit()):
                 if output == ground_truth:
                     if task_difficulty is not None:
                         self.correct[task_difficulty] += 1
