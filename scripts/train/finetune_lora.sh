@@ -11,7 +11,7 @@ LORAALPHA=$8  # The scaling factor that controls the magnitude of the low-rank a
 MODALTYPE=$9  # Text_Only, Vision_Only, Vision_Text (both image and text)
 TASKTYPE=${10}  # GITQA-BASE, GITQA-AUGET, GITQA-AUGLY, GITQA-AUGNO, GITQA-AUGNS; NODECLS; LINKPRED
 UNFREEZEV=${11}  # Optional: Fine-tune vision tower or not when Vision_Only or Vision_Text. If True, yes. (default: True)
-LAYOUTAUG=${12}  # Optional: Execute layout augmentation when training large graph data or not when Vision_Text. (default: True)
+LAYOUTAUG=${12}  # Optional: Execute layout augmentation when training large graph data in Vision_Text. (default: True)
 
 
 wandb offline

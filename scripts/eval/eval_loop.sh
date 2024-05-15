@@ -1,21 +1,22 @@
 #!/bin/bash
 
 gpu_ids=(
-    "1"
+    "6"
 )
 
 declare -a hyper_1=(
-    "cycle"
-    "flow"
-    "hamilton"
-    "matching"
-    "shortest_path"
-    "topology"
-    "connectivity"
+     "cycle"
+     "flow"
+     "hamilton"
+     "matching"
+     "shortest_path"
+     "topology"
+     "connectivity"
 
 #    "CiteSeer"
 #    "Cora"
 #    "email-Eu-core"
+#    "PolBlogs"
 
 #    "ca-GrQc"
 #    "ca-HepTh"
@@ -23,24 +24,22 @@ declare -a hyper_1=(
 
 declare -a hyper_2=(
     "7b none none none zero-shot Text_Only GITQA-BASE none none"
-    "7b none none none zero-shot Text_Only GITQA-BASE none none"
-    "13b none none none zero-shot Text_Only GITQA-BASE none none"
     "13b none none none zero-shot Text_Only GITQA-BASE none none"
 
-    "7b none none none zero-shot Vision_Text GITQA-BASE none none"
-    "7b none none none zero-shot Vision_Text GITQA-BASE none none"
-    "13b none none none zero-shot Vision_Text GITQA-BASE none none"
-    "13b none none none zero-shot Vision_Text GITQA-BASE none none"
+#    "7b none none none zero-shot Vision_Text GITQA-BASE none none"
+#    "13b none none none zero-shot Vision_Text GITQA-BASE none none"
 
-    "7b none none none zero-shot Vision_Only GITQA-BASE none none"
-    "7b none none none zero-shot Vision_Only GITQA-BASE none none"
-    "13b none none none zero-shot Vision_Only GITQA-BASE none none"
-    "13b none none none zero-shot Vision_Only GITQA-BASE none none"
+#    "7b none none none zero-shot Vision_Only GITQA-BASE none none"
+#    "13b none none none zero-shot Vision_Only GITQA-BASE none none"
 
-    "7b 5 64 16 fine-tuned Vision_Text GITQA-BASE True False"
-    "7b 10 64 16 fine-tuned Vision_Text GITQA-BASE True False"
-    "7b 5 64 16 fine-tuned Vision_Text GITQA-BASE False False"
-    "7b 10 64 16 fine-tuned Vision_Text GITQA-BASE False False"
+#    "7b 5 64 16 fine-tuned Vision_Text NODECLS True False"
+#    "7b 10 64 16 fine-tuned Vision_Text NODECLS True False"
+#    "7b 5 64 16 fine-tuned Vision_Text NODECLS True True"
+#    "7b 10 64 16 fine-tuned Vision_Text NODECLS True True"
+#    "7b 5 64 16 fine-tuned Vision_Text NODECLS False False"
+#    "7b 10 64 16 fine-tuned Vision_Text NODECLS False False"
+#    "7b 5 64 16 fine-tuned Vision_Text NODECLS False True"
+#    "7b 10 64 16 fine-tuned Vision_Text NODECLS False True"
 )
 
 declare -a params=()
