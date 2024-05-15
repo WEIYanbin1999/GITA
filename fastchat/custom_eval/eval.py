@@ -200,7 +200,7 @@ def eval_model(args):
         conv.append_message(conv.roles[1], None)
         prompt = conv.get_prompt()
         input_ids = tokenizer([prompt]).input_ids
-        input_ids = input_ids[:, :4050]
+        input_ids = [ids[:4050] for ids in input_ids]
         
         with torch.inference_mode():
             output_ids = model.generate(
