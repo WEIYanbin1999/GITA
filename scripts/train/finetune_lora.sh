@@ -2,14 +2,14 @@
 
 GPU_IDS=$1
 PORT=$2
-TASK=$3  # GITQA: cycle, connectivity, ...; NODECLS: CiteSeer, Cora, email-Eu-core, PolBlogs; LINKPRED: ca-GrQc, ca-HepTh
+TASK=$3  # GVLQA: cycle, connectivity, ...; NODECLS: CiteSeer, Cora, email-Eu-core, PolBlogs; LINKPRED: ca-GrQc, ca-HepTh
 MODELSIZE=$4
 EPOCH=$5
 BSZ=$6
 LORAR=$7  # The rank of the low-rank matrices used in the LoRA adaptation (default: 64)
 LORAALPHA=$8  # The scaling factor that controls the magnitude of the low-rank adaptation (default: 16)
 MODALTYPE=$9  # Text_Only, Vision_Only, Vision_Text (both image and text)
-TASKTYPE=${10}  # GITQA-BASE, GITQA-AUGET, GITQA-AUGLY, GITQA-AUGNO, GITQA-AUGNS; NODECLS; LINKPRED
+TASKTYPE=${10}  # GVLQA-BASE, GVLQA-AUGET, GVLQA-AUGLY, GVLQA-AUGNO, GVLQA-AUGNS; NODECLS; LINKPRED
 UNFREEZEV=${11}  # Optional: Fine-tune vision tower or not when Vision_Only or Vision_Text. If True, yes. (default: True)
 LAYOUTAUG=${12}  # Optional: Execute layout augmentation when training large graph data in Vision_Text. (default: True)
 
@@ -17,7 +17,7 @@ LAYOUTAUG=${12}  # Optional: Execute layout augmentation when training large gra
 wandb offline
 
 parent_dir="../dataset/${TASKTYPE}"
-if [[ "$TASKTYPE" == *"GITQA"* ]]; then
+if [[ "$TASKTYPE" == *"GVLQA"* ]]; then
     data_path="../dataset/${TASKTYPE}/data/${TASK}/QA/${MODALTYPE}_train.json"
 else
     # i.e. NODECLS or LINKPRED
@@ -70,7 +70,7 @@ if [ "$MODALTYPE" == "Text_Only" ]; then
 elif [[ "$MODALTYPE" == "Vision_Only" || "$MODALTYPE" == "Vision_Text" ]]; then
     pretrained_model_path="../local_llm/llava-v1.5-${MODELSIZE}"
 
-    if [[ "$TASKTYPE" == *"GITQA"* ]]; then
+    if [[ "$TASKTYPE" == *"GVLQA"* ]]; then
         checkpoint_path="./checkpoints/${MODALTYPE}/${TASKTYPE}/${TASK}/llava-v1.5-${MODELSIZE}-lora(${LORAR}, ${LORAALPHA})-unfreeze_vit-${UNFREEZEV}-epoch-${EPOCH}"
     else
         checkpoint_path="./checkpoints/${MODALTYPE}/${TASKTYPE}/${TASK}/llava-v1.5-${MODELSIZE}-lora(${LORAR}, ${LORAALPHA})-unfreeze_vit-${UNFREEZEV}-layout_aug-${LAYOUTAUG}-epoch-${EPOCH}"
