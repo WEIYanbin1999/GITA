@@ -23,11 +23,11 @@ declare -a hyper_1=(
 )
 
 declare -a hyper_2=(
-    "7b 5 16 64 16 Vision_Only GITQA-AUGET True False"
-    "7b 10 16 64 16 Vision_Only GITQA-BASE True False"
+    "7b 5 16 64 16 Vision_Only GVLQA-AUGET True False"
+    "7b 10 16 64 16 Vision_Only GVLQA-BASE True False"
 
-    "7b 5 32 64 16 Vision_Text GITQA-BASE False False"
-    "7b 10 32 64 16 Vision_Text GITQA-BASE False False"
+    "7b 5 32 64 16 Vision_Text GVLQA-BASE False False"
+    "7b 10 32 64 16 Vision_Text GVLQA-BASE False False"
 )
 
 declare -a params=()
