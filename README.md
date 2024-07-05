@@ -25,4 +25,4 @@ Please organize the data as follows:
     └── ...
 ```
 
-All the experiments can be reproduced by specifying the needed settings in the Script file.
+To reproduce the experimental results, you can run the scripts in the ./Scripts Folder.
