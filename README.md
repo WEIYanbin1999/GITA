@@ -1,4 +1,4 @@
-# GITA: Graph to Image-Text Assistant for Vision-Language Graph Reasoning
+# GITA: Graph to Image-Text Integration for Vision-Language Graph Reasoning
 
 ## Install
 ```bash
