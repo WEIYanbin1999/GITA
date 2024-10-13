@@ -17,12 +17,21 @@ sudo apt install graphviz
 Please organize the data as follows:
 ```
 ├── dataset
-│   ├── GITQA-BASE
+│   ├── GVLQA-BASE
+|   ├── GVLQA-AUGET
+|   ├── GVLQA-AUGLY
+|   ├── GVLQA-AUGNO
+|   ├── GVLQA-AUGNS
 │   ├── NODECLS
 │   ├── LINKPRED
-│   └── ...
-└── GIT
-    └── ...
+│   └── ...(any custom datasets, applying GITA on existing graph data to generate their vision-language version)
+└── GITA
+    ├── answer
+    ├── checkpoints
+    ├── fastchat
+    ├── llava
+    └── scripts
+
 ```
 
 To reproduce the experimental results, you can run the scripts in the ./Scripts Folder.
