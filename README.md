@@ -34,5 +34,5 @@ Please organize the data as follows:
 
 ```
 
-To reproduce the experimental results, you can run the scripts in the ./Scripts Folder, which includes training and evaluation for all tasks and all models. 
+To reproduce the experimental results, you can run the scripts in the ./Scripts Folder, which includes training and evaluation scripts. 
 
