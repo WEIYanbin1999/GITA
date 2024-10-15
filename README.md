@@ -1,5 +1,5 @@
-# GITA: Graph to Image-Text Integration for Vision-Language Graph Reasoning
-
+# GITA
+The official repository of NeurIPS 2024 paper: "GITA: Graph to Image-Text Integration for Vision-Language Graph Reasoning"
 ## Install
 ```bash
 
