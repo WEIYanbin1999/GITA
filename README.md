@@ -1,6 +1,11 @@
 # GITA
 [NeurIPS 2024] GITA: Graph to Image-Text Integration for Vision-Language Graph Reasoning
 
+## Please fell free to use our GVLQA Datasets for vision-language reasoning!!
+Download:
+https://huggingface.co/collections/Yanbin99/gvlqa-datasets-65c705c9488606617e246bd3
+
+
 ## Install
 ```bash
 
@@ -15,6 +20,7 @@ pip install torch-scatter torch-sparse -f https://data.pyg.org/whl/torch-2.0.1+c
 sudo apt install graphviz
 ```
 
+## File structures
 Please organize the data as follows:
 ```
 ├── dataset
