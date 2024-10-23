@@ -60,14 +60,16 @@ gpu_ids=(
 )
 ~~~
 
-Second, specify the tasks, for example, you want to reproduce the "cycle"
+Second, specify the tasks in hyper_1 in finetune_lora_loop.sh,
+
+for example, if you want to reproduce the "cycle", you should modify the hyper_1 in finetune_lora_loop.sh as:
 ~~~
 declare -a hyper_1=(
     "cycle"
 )
 ~~~
 
-Third, specify the other hyperparameters, they are arranged in the ordering
+Third, specify the other hyperparameters, they are arranged in the ordering:
 ~~~
 MODELSIZE
 EPOCH  # Epoches from {1,5,10,20,30,50}
@@ -80,9 +82,7 @@ UNFREEZEV  # Optional: Fine-tune vision tower or not when Vision_Only or Vision_
 LAYOUTAUG  # Optional: Whether to use layout augmentation. If True, yes.
 ~~~
 
-For each setting, please refer to the following table to find their exact configurations
-
-Then modify the hyper_2 in finetune_lora_loop.sh
+**!Note**: For each setting, please refer to the following table to find their exact configurations, then use the corresponding configurations to replace the hyper_2 in finetune_lora_loop.sh.
 
 GITA-7B:
 
