@@ -86,7 +86,7 @@ LAYOUTAUG  # Optional: Whether to use layout augmentation online. If True, yes.
 
 1) GITA-7B:
 
-|Task|hyper_2: MODELSIZE EPOCH BSZ LORAR LOEAALPHA MODALTYPE TASKTYPE UNFREEZEV LAYOUTAYG|
+|Task|hyper_2: MODELSIZE EPOCH BSZ LORAR LORAALPHA MODALTYPE TASKTYPE UNFREEZEV LAYOUTAUG|
 |:---|:---|
 |connectivity|7b 1 16 128 256 Vision_Text GVLQA-BASE False False|
 |cycle|7b 20 16 128 256 Vision_Text GVLQA-BASE False False|
@@ -98,7 +98,7 @@ LAYOUTAUG  # Optional: Whether to use layout augmentation online. If True, yes.
 
 2) GITA-13B:
 
-|Task|hyper_2: MODELSIZE EPOCH BSZ LORAR LOEAALPHA MODALTYPE TASKTYPE UNFREEZEV LAYOUTAYG|
+|Task|hyper_2: MODELSIZE EPOCH BSZ LORAR LORAALPHA MODALTYPE TASKTYPE UNFREEZEV LAYOUTAUG|
 |:---|:---|
 |connectivity|13b 1 16 128 256 Vision_Text GVLQA-BASE False False|
 |cycle|13b 10 16 128 256 Vision_Text GVLQA-BASE False False|
@@ -110,7 +110,7 @@ LAYOUTAUG  # Optional: Whether to use layout augmentation online. If True, yes.
 
 3) GITA-7B on GVLQA-AUGLY (i.e., GITA with layout augmentation)
 
-|Task|hyper_2: MODELSIZE EPOCH BSZ LORAR LOEAALPHA MODALTYPE TASKTYPE UNFREEZEV LAYOUTAYG|
+|Task|hyper_2: MODELSIZE EPOCH BSZ LORAR LORAALPHA MODALTYPE TASKTYPE UNFREEZEV LAYOUTAUG|
 |:---|:---|
 |connectivity|7b 10 16 64 16 Vision_Only GVLQA-AUGLY True False|
 |cycle|7b 10 16 128 256 Vision_Only GVLQA-AUGLY False False|
@@ -120,17 +120,30 @@ LAYOUTAUG  # Optional: Whether to use layout augmentation online. If True, yes.
 |matching|7b 20 16 128 256 Vision_Only GVLQA-AUGLY False False|
 |hamilton|7b 30 16 64 16 Vision_Only GVLQA-AUGLY False False|
 
+4) Augmentation variants (AUGNO, AUGNS, AUGET) and Modality variants (Vision-Only)
+   
+For Augmentation variants, replace GVLQA-Base to GVLQA_AUGNO/GVLQA_AUGNS/GVLQA_AUGET
+
+For Modality variants, replace Vision_Text to Vision_Only
+
 Finally, run:
 ~~~
 cd GITA
 bash ./scripts/train/finetune_lora_loop.sh
 ~~~
 
+
 ### Evaluation
-Also follow the same instructions as Training to specify gpu_ids, hyper_1 and hyper_2 in eval_loop.sh.
+Also follow the same instructions as Training to specify gpu_ids, hyper_1, and hyper_2 in eval_loop.sh.
 ~~~
 cd GITA
 bash ./scripts/eval/eval_loop.sh
+~~~
+For zero-shot GITA, set EPOCH BSZ LORAR UNRREEZEV LAYOUTAYG in para_2 as none
+
+For example, evaluate zero-shot GITA-7B Vision-Only on GVLQA-BASE, set para_2:
+~~~
+7b none none none 16 Vision_Only GVLQA-Base none none
 ~~~
 
 ## Cite us
