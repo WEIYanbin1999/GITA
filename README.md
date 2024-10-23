@@ -44,7 +44,7 @@ Please organize the data as follows:
 ## Reproduction
 To reproduce the experimental results, you can run the scripts in the ./Scripts Folder, which includes training and evaluation scripts. 
 
-Training:  
+### Training:  
 For each setting, before fine-tuning, you should modify the hyperparameters in the finetuning script finetune_lora_loop.sh with following configurations:
 
 First, specify the gpu_ids as the ids of the GPUs you want to use:
@@ -115,3 +115,9 @@ cd GITA
 bash ./scripts/train/finetune_lora_loop.sh
 ~~~
 
+### Evaluation
+Also follow the same instructions as Training to specify gpu_ids, hyper_1 and hyper_2 in eval_loop.sh.
+~~~
+cd GITA
+bash ./scripts/eval/eval_loop.sh
+~~~
