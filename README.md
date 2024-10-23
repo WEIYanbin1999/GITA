@@ -47,7 +47,7 @@ To reproduce the experimental results, you can run the scripts in the ./Scripts 
 ### Training:  
 For each setting, before fine-tuning, you should modify the hyperparameters in the finetuning script finetune_lora_loop.sh with following configurations:
 
-First, specify the gpu_ids as the ids of the GPUs you want to use:
+#### Step 1: First, specify the gpu_ids as the ids of the GPUs you want to use:
 ~~~
 gpu_ids=(
     "0,1,2,3,4,5,6,7"
@@ -60,54 +60,65 @@ gpu_ids=(
 )
 ~~~
 
-Second, specify the tasks in hyper_1 in finetune_lora_loop.sh,
+#### Step 2: Second, specify the tasks in hyper_1 in finetune_lora_loop.sh:
 
-for example, if you want to reproduce the "cycle", you should modify the hyper_1 in finetune_lora_loop.sh as:
+for example, if you want to reproduce the "cycle", you should modify the hyper_1 in finetune_lora_loop.sh as,
 ~~~
 declare -a hyper_1=(
     "cycle"
 )
 ~~~
 
-Third, specify the other hyperparameters, they are arranged in the ordering:
+#### Step 3: Third, specify the other hyperparameters in hyper_2, they are arranged in the ordering:
 ~~~
 MODELSIZE
 EPOCH  # Epoches from {1,5,10,20,30,50}
-BSZ    # per device train batch_size from {16,32}
+BSZ    # per-device train batch size from {16,32}. However, due to the use of gradient accumulation, the actual total batch size remains constant at 128, regardless of the specific per-device batch size value chosen.
 LORAR  # The rank of the low-rank matrices used in the LoRA adaptation
 LORAALPHA  # The scaling factor that controls the magnitude of the low-rank adaptation
 MODALTYPE  # Text_Only, Vision_Only, Vision_Text (both image and text)
 TASKTYPE  # GVLQA-BASE, GVLQA-AUGET, GVLQA-AUGLY, GVLQA-AUGNO, GVLQA-AUGNS; NODECLS; LINKPRED
 UNFREEZEV  # Optional: Fine-tune vision tower or not when Vision_Only or Vision_Text. If True, yes.
-LAYOUTAUG  # Optional: Whether to use layout augmentation. If True, yes.
+LAYOUTAUG  # Optional: Whether to use layout augmentation online. If True, yes.
 ~~~
 
-**!Note**: For each setting, please refer to the following table to find their exact configurations, then use the corresponding configurations to replace the hyper_2 in finetune_lora_loop.sh.
+#### For each setting, please refer to the following table to find their exact configurations, then use the corresponding configurations to replace the hyper_2 in finetune_lora_loop.sh.
 
-GITA-7B:
+1) GITA-7B:
 
 |Task|hyper_2: MODELSIZE EPOCH BSZ LORAR LOEAALPHA MODALTYPE TASKTYPE UNFREEZEV LAYOUTAYG|
-|---|---|
+|:---|:---|
 |connectivity|7b 1 16 128 256 Vision_Text GVLQA-BASE False False|
 |cycle|7b 20 16 128 256 Vision_Text GVLQA-BASE False False|
 |topology|7b 10 16 128 256 Vision_Text GVLQA-BASE False False|
-|shoretest_path|7b 10 16 128 256 Vision_Text GVLQA-BASE False False|
+|shortest_path|7b 10 16 128 256 Vision_Text GVLQA-BASE False False|
 |flow|7b 20 16 128 256 Vision_Text GVLQA-BASE False False|
 |matching|7b 5 16 128 256 Vision_Text GVLQA-BASE False False|
 |hamilton|7b 30 16 128 256 Vision_Text GVLQA-BASE False False|
 
-GITA-13B:
+2) GITA-13B:
 
 |Task|hyper_2: MODELSIZE EPOCH BSZ LORAR LOEAALPHA MODALTYPE TASKTYPE UNFREEZEV LAYOUTAYG|
-|---|---|
+|:---|:---|
 |connectivity|13b 1 16 128 256 Vision_Text GVLQA-BASE False False|
 |cycle|13b 10 16 128 256 Vision_Text GVLQA-BASE False False|
 |topology|13b 10 16 128 256 Vision_Text GVLQA-BASE False False|
-|shoretest_path|13b 10 16 128 256 Vision_Text GVLQA-BASE False False|
+|shortest_path|13b 10 16 128 256 Vision_Text GVLQA-BASE False False|
 |flow|13b 10 16 128 256 Vision_Text GVLQA-BASE False False|
 |matching|13b 50 16 128 256 Vision_Text GVLQA-BASE False False|
 |hamilton|13b 30 16 128 256 Vision_Text GVLQA-BASE False False|
 
+3) GITA-7B on GVLQA-AUGLY (i.e., GITA with layout augmentation)
+
+|Task|hyper_2: MODELSIZE EPOCH BSZ LORAR LOEAALPHA MODALTYPE TASKTYPE UNFREEZEV LAYOUTAYG|
+|:---|:---|
+|connectivity|7b 10 16 64 16 Vision_Only GVLQA-AUGLY True False|
+|cycle|7b 10 16 128 256 Vision_Only GVLQA-AUGLY False False|
+|topology|7b 1 16 128 256 Vision_Only GVLQA-AUGLY False False|
+|shortest_path|7b 20 16 128 256 Vision_Only GVLQA-AUGLY False False|
+|flow|7b 1 16 64 16 Vision_Only GVLQA-AUGLY True False|
+|matching|7b 20 16 128 256 Vision_Only GVLQA-AUGLY False False|
+|hamilton|7b 30 16 64 16 Vision_Only GVLQA-AUGLY False False|
 
 Finally, run:
 ~~~
@@ -120,4 +131,14 @@ Also follow the same instructions as Training to specify gpu_ids, hyper_1 and hy
 ~~~
 cd GITA
 bash ./scripts/eval/eval_loop.sh
+~~~
+
+## Cite us
+~~~
+@article{wei2024rendering,
+  title={Rendering graphs for graph reasoning in multimodal large language models},
+  author={Wei, Yanbin and Fu, Shuai and Jiang, Weisen and Kwok, James T and Zhang, Yu},
+  journal={arXiv preprint arXiv:2402.02130},
+  year={2024}
+}
 ~~~
