@@ -81,7 +81,9 @@ LAYOUTAUG  # Optional: Whether to use layout augmentation. If True, yes.
 ~~~
 
 For each setting, please refer to the following table to find their exact configurations to modify the hyper_2 in finetune_lora_loop.sh
+
 GITA-7B:
+
 |Task|hyper_2: MODELSIZE EPOCH BSZ LORAR LOEAALPHA MODALTYPE TASKTYPE UNFREEZEV LAYOUTAYG|
 |---|---|
 |connectivity|7b 1 16 128 256 Vision_Text GVLQA-BASE False False|
@@ -93,6 +95,7 @@ GITA-7B:
 |hamilton|7b 30 16 128 256 Vision_Text GVLQA-BASE False False|
 
 GITA-13B:
+
 |Task|hyper_2: MODELSIZE EPOCH BSZ LORAR LOEAALPHA MODALTYPE TASKTYPE UNFREEZEV LAYOUTAYG|
 |---|---|
 |connectivity|13b 1 16 128 256 Vision_Text GVLQA-BASE False False|
