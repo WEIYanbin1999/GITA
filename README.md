@@ -43,3 +43,6 @@ Please organize the data as follows:
 
 ## Reproduction
 To reproduce the experimental results, you can run the scripts in the ./Scripts Folder, which includes training and evaluation scripts. 
+
+The detailed configurations to reproduce each setting:
+|modal type|task type|task name|model size|
