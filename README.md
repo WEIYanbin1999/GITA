@@ -126,7 +126,7 @@ For Augmentation variants, replace GVLQA-Base to GVLQA_AUGNO/GVLQA_AUGNS/GVLQA_A
 
 For Modality variants, replace Vision_Text to Vision_Only
 
-Finally, run:
+#### Step 4: Finally, run:
 ~~~
 cd GITA
 bash ./scripts/train/finetune_lora_loop.sh
