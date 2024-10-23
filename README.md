@@ -81,7 +81,7 @@ LAYOUTAUG  # Optional: Whether use layout augmentation. If True, yes. (default: 
 For each setting, please refer following table to find their exact configurations to modify the hyper_2 in finetune_lora_loop.sh
 GITA-7B:
 |Task|hyper_2|
----
+|---|---|
 |cycle||
 GITA-13B:
 
