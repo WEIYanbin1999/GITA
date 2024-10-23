@@ -84,7 +84,7 @@ LAYOUTAUG  # Optional: Whether to use layout augmentation online. If True, yes.
 
 #### For each setting, please refer to the following table to find their exact configurations, then use the corresponding configurations to replace the hyper_2 in finetune_lora_loop.sh.
 
-1) GITA-7B:
+(1) GITA-7B:
 
 |Task|hyper_2: MODELSIZE EPOCH BSZ LORAR LORAALPHA MODALTYPE TASKTYPE UNFREEZEV LAYOUTAUG|
 |:---|:---|
@@ -96,7 +96,7 @@ LAYOUTAUG  # Optional: Whether to use layout augmentation online. If True, yes.
 |matching|7b 5 16 128 256 Vision_Text GVLQA-BASE False False|
 |hamilton|7b 30 16 128 256 Vision_Text GVLQA-BASE False False|
 
-2) GITA-13B:
+(2) GITA-13B:
 
 |Task|hyper_2: MODELSIZE EPOCH BSZ LORAR LORAALPHA MODALTYPE TASKTYPE UNFREEZEV LAYOUTAUG|
 |:---|:---|
@@ -108,7 +108,7 @@ LAYOUTAUG  # Optional: Whether to use layout augmentation online. If True, yes.
 |matching|13b 50 16 128 256 Vision_Text GVLQA-BASE False False|
 |hamilton|13b 30 16 128 256 Vision_Text GVLQA-BASE False False|
 
-3) GITA-7B on GVLQA-AUGLY (i.e., GITA with layout augmentation)
+(3) GITA-7B on GVLQA-AUGLY (i.e., GITA with layout augmentation)
 
 |Task|hyper_2: MODELSIZE EPOCH BSZ LORAR LORAALPHA MODALTYPE TASKTYPE UNFREEZEV LAYOUTAUG|
 |:---|:---|
@@ -120,7 +120,7 @@ LAYOUTAUG  # Optional: Whether to use layout augmentation online. If True, yes.
 |matching|7b 20 16 128 256 Vision_Only GVLQA-AUGLY False False|
 |hamilton|7b 30 16 64 16 Vision_Only GVLQA-AUGLY False False|
 
-4) Augmentation variants (AUGNO, AUGNS, AUGET) and Modality variants (Vision-Only)
+(4) Augmentation variants (AUGNO, AUGNS, AUGET) and Modality variants (Vision-Only)
    
 For Augmentation variants, replace GVLQA-Base to GVLQA_AUGNO/GVLQA_AUGNS/GVLQA_AUGET
 
