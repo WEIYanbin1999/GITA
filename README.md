@@ -120,9 +120,9 @@ LAYOUTAUG  # Optional: Whether to use layout augmentation online. If True, yes.
 |matching|7b 20 16 128 256 Vision_Only GVLQA-AUGLY False False|
 |hamilton|7b 30 16 64 16 Vision_Only GVLQA-AUGLY False False|
 
-(4) Augmentation variants (AUGNO, AUGNS, AUGET) and Modality variants (Vision-Only)
+(4) Visual Graph Augmentation Variants (AUGNO, AUGNS, AUGET) and Modality Variants (Vision-Only)
    
-For Augmentation variants, replace GVLQA-Base to GVLQA_AUGNO/GVLQA_AUGNS/GVLQA_AUGET
+For Visual Graph Augmentation variants, replace GVLQA-Base to GVLQA_AUGLY/GVLQA_AUGNO/GVLQA_AUGNS/GVLQA_AUGET
 
 For Modality variants, replace Vision_Text to Vision_Only
 
