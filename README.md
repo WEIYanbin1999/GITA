@@ -44,5 +44,51 @@ Please organize the data as follows:
 ## Reproduction
 To reproduce the experimental results, you can run the scripts in the ./Scripts Folder, which includes training and evaluation scripts. 
 
-The detailed configurations to reproduce each setting:
-|modal type|task type|task name|model size|
+Training:  
+For each setting, before fine-tuning, you should modify the hyperparameters in the finetuning script finetune_lora_loop.sh with following configurations:
+
+First, specify the gpu_ids as the ids of the GPUs you want to use:
+~~~
+gpu_ids=(
+    "0,1,2,3,4,5,6,7"
+)
+~~~
+If you use 8 GPUs from 0 to 7, or if you want to use a single GPU:
+~~~
+gpu_ids=(
+    "0"
+)
+~~~
+
+Second, specify the tasks, for example, you want to reproduce the "cycle"
+~~~
+declare -a hyper_1=(
+    "cycle"
+)
+~~~
+
+Third, specify the other hyperparameters, they are arranged in ordering "
+MODELSIZE
+EPOCH
+BSZ
+LORAR  # The rank of the low-rank matrices used in the LoRA adaptation (default: 64)
+LORAALPHA  # The scaling factor that controls the magnitude of the low-rank adaptation (default: 16)
+MODALTYPE  # Text_Only, Vision_Only, Vision_Text (both image and text)
+TASKTYPE  # GVLQA-BASE, GVLQA-AUGET, GVLQA-AUGLY, GVLQA-AUGNO, GVLQA-AUGNS; NODECLS; LINKPRED
+UNFREEZEV  # Optional: Fine-tune vision tower or not when Vision_Only or Vision_Text. If True, yes. (default: True)
+LAYOUTAUG  # Optional: Whether use layout augmentation. If True, yes. (default: False)
+"
+For each setting, please refer following table to find their exact configurations to modify the hyper_2 in finetune_lora_loop.sh
+GITA-7B:
+|Task|hyper_2|
+---
+|cycle||
+GITA-13B:
+
+
+Finally, run:
+~~~
+cd GITA
+bash ./scripts/train/finetune_lora_loop.sh
+~~~
+
