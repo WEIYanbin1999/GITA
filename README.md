@@ -1,4 +1,4 @@
-# GITA
+![image](https://github.com/user-attachments/assets/289f99b0-55cc-435e-976c-31000a6ef3d3)# GITA
 [NeurIPS 2024] GITA: Graph to Image-Text Integration for Vision-Language Graph Reasoning
 
 ## Please fell free to use our GVLQA Datasets for vision-language reasoning!!
@@ -70,22 +70,36 @@ declare -a hyper_1=(
 Third, specify the other hyperparameters, they are arranged in the ordering
 ~~~
 MODELSIZE
-EPOCH  # Epoches from {1,5,10,15}
-BSZ    # batch_size from {16,32}
-LORAR  # The rank of the low-rank matrices used in the LoRA adaptation (default: 64)
-LORAALPHA  # The scaling factor that controls the magnitude of the low-rank adaptation (default: 16)
+EPOCH  # Epoches from {1,5,10,20,30,50}
+BSZ    # per device train batch_size from {16,32}
+LORAR  # The rank of the low-rank matrices used in the LoRA adaptation
+LORAALPHA  # The scaling factor that controls the magnitude of the low-rank adaptation
 MODALTYPE  # Text_Only, Vision_Only, Vision_Text (both image and text)
 TASKTYPE  # GVLQA-BASE, GVLQA-AUGET, GVLQA-AUGLY, GVLQA-AUGNO, GVLQA-AUGNS; NODECLS; LINKPRED
-UNFREEZEV  # Optional: Fine-tune vision tower or not when Vision_Only or Vision_Text. If True, yes. (default: True)
-LAYOUTAUG  # Optional: Whether use layout augmentation. If True, yes. (default: False)
+UNFREEZEV  # Optional: Fine-tune vision tower or not when Vision_Only or Vision_Text. If True, yes.
+LAYOUTAUG  # Optional: Whether to use layout augmentation. If True, yes.
 ~~~
 
-For each setting, please refer following table to find their exact configurations to modify the hyper_2 in finetune_lora_loop.sh
+For each setting, please refer to the following table to find their exact configurations to modify the hyper_2 in finetune_lora_loop.sh
 GITA-7B:
-|Task|hyper_2|
+|Task|hyper_2: MODELSIZE EPOCH BSZ LORAR LOEAALPHA MODALTYPE TASKTYPE UNFREEZEV LAYOUTAYG|
 |---|---|
-|cycle||
+|connectivity|7b 1 16 128 256 Vision_Text GVLQA-BASE False False|
+|cycle|7b 20 16 128 256 Vision_Text GVLQA-BASE False False|
+|topology|7b 10 16 128 256 Vision_Text GVLQA-BASE False False|
+|shoretest_path|7b 10 16 128 256 Vision_Text GVLQA-BASE False False|
+|flow|7b 20 16 128 256 Vision_Text GVLQA-BASE False False|
+|matching|7b 5 16 128 256 Vision_Text GVLQA-BASE False False|
+|hamilton|7b 30 16 128 256 Vision_Text GVLQA-BASE False False|
+
 GITA-13B:
+|connectivity|13b 1 16 128 256 Vision_Text GVLQA-BASE False False|
+|cycle|13b 10 16 128 256 Vision_Text GVLQA-BASE False False|
+|topology|13b 10 16 128 256 Vision_Text GVLQA-BASE False False|
+|shoretest_path|13b 10 16 128 256 Vision_Text GVLQA-BASE False False|
+|flow|13b 10 16 128 256 Vision_Text GVLQA-BASE False False|
+|matching|13b 50 16 128 256 Vision_Text GVLQA-BASE False False|
+|hamilton|13b 30 16 128 256 Vision_Text GVLQA-BASE False False|
 
 
 Finally, run:
