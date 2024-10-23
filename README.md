@@ -67,17 +67,19 @@ declare -a hyper_1=(
 )
 ~~~
 
-Third, specify the other hyperparameters, they are arranged in ordering "
+Third, specify the other hyperparameters, they are arranged in the ordering
+~~~
 MODELSIZE
-EPOCH
-BSZ
+EPOCH  # Epoches from {1,5,10,15}
+BSZ    # batch_size from {16,32}
 LORAR  # The rank of the low-rank matrices used in the LoRA adaptation (default: 64)
 LORAALPHA  # The scaling factor that controls the magnitude of the low-rank adaptation (default: 16)
 MODALTYPE  # Text_Only, Vision_Only, Vision_Text (both image and text)
 TASKTYPE  # GVLQA-BASE, GVLQA-AUGET, GVLQA-AUGLY, GVLQA-AUGNO, GVLQA-AUGNS; NODECLS; LINKPRED
 UNFREEZEV  # Optional: Fine-tune vision tower or not when Vision_Only or Vision_Text. If True, yes. (default: True)
 LAYOUTAUG  # Optional: Whether use layout augmentation. If True, yes. (default: False)
-"
+~~~
+
 For each setting, please refer following table to find their exact configurations to modify the hyper_2 in finetune_lora_loop.sh
 GITA-7B:
 |Task|hyper_2|
