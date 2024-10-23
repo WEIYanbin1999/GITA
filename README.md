@@ -1,4 +1,4 @@
-![image](https://github.com/user-attachments/assets/289f99b0-55cc-435e-976c-31000a6ef3d3)# GITA
+# GITA
 [NeurIPS 2024] GITA: Graph to Image-Text Integration for Vision-Language Graph Reasoning
 
 ## Please fell free to use our GVLQA Datasets for vision-language reasoning!!
