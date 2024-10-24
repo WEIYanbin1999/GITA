@@ -1,0 +1,26 @@
+{
+  "auto_mapping": null,
+  "base_model_name_or_path": "/mnt/sdb1/local_llm/llava-v1.5-13b",
+  "bias": "none",
+  "fan_in_fan_out": false,
+  "inference_mode": true,
+  "init_lora_weights": true,
+  "layers_pattern": null,
+  "layers_to_transform": null,
+  "lora_alpha": 256,
+  "lora_dropout": 0.05,
+  "modules_to_save": null,
+  "peft_type": "LORA",
+  "r": 128,
+  "revision": null,
+  "target_modules": [
+    "o_proj",
+    "gate_proj",
+    "q_proj",
+    "up_proj",
+    "down_proj",
+    "k_proj",
+    "v_proj"
+  ],
+  "task_type": "CAUSAL_LM"
+}
