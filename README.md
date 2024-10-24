@@ -10,9 +10,22 @@ Introducing **GVLQA Benchmark**, the **first-ever** vision-language reasoning be
 
 ## 🤖 Contribution 2: GITA 7B/13B 🤖
 
-Meet **GITA-7B/13B**, our series of Vision-Language Models specifically crafted for vision-language graph reasoning. These models are the result of fine-tuning on the GVLQA datasets with the robust LLaVA-1.5 backbone. 🎉
+Introducing **GITA-7B/13B**, a groundbreaking series of Vision-Language Models crafted specifically for vision-language graph reasoning. These models are expertly fine-tuned on the GVLQA datasets using the powerful LLaVA-1.5 backbone. 🎉
 
-🔜 **Stay Tuned**: Checkpoints are on their way!
+### Pre-Trained Vision-Language Models with Graph Structural Understanding
+
+Harness the power of **GITA-7B/13B**, pre-trained models uniquely equipped with graph structural understanding. This capability makes them particularly valuable for addressing a variety of graph-related challenges. Enhanced with modified weights distinct from the original LLaVA, these models are available in the `checkpoints/Vision_Text/` directory. You have the flexibility to use these models as they are or to re-train them to better fit your specific requirements.
+
+Their ability to perceive and process graph structures distinguishes them as a robust start point for any project requiring advanced graph reasoning capabilities.
+
+### Model Zoo
+
+For your convenience, we offer a packed version that integrates all weights from both the GITA modifications (LoRa Adaptor and projector) and the original LLaVA weights into a single comprehensive model. Explore our Model Zoo for seamless access:
+
+- **GITA-7B**: [Hugging Face - GITA-7B](https://huggingface.co/Yanbin99/GITA-7B)
+- **GITA-13B**: [Hugging Face - GITA-13B](https://huggingface.co/Yanbin99/GITA-13B)
+
+Dive into your graph reasoning projects with cutting-edge graph-understanding vision-language models GITA-7B/13B!
 
 ## 🛠️ Install
 
