@@ -14,7 +14,7 @@ Introducing **GITA-7B/13B**, a groundbreaking series of Vision-Language Models c
 
 ### Pre-Trained Vision-Language Models with Graph Structural Understanding
 
-Harness the power of **GITA-7B/13B**, pre-trained models uniquely equipped with graph structural understanding. This capability makes them particularly valuable for addressing a variety of graph-related challenges. Enhanced with modified weights distinct from the original LLaVA, these models are available in the `checkpoints/Vision_Text/` directory. You have the flexibility to use these models as they are or to re-train them to better fit your specific requirements.
+Harness the power of **GITA-7B/13B**, pre-trained models uniquely equipped with graph structural understanding. This capability makes them particularly valuable for addressing a variety of graph-related challenges. Enhanced with modified weights distinct from the original LLaVA, these models are available in the `checkpoints/Vision_Text/GVLQA_BASE` directory. You have the flexibility to use these models as they are or to re-train them to better fit your specific requirements.
 
 Their ability to perceive and process graph structures distinguishes them as a robust start point for any project requiring advanced graph reasoning capabilities.
 
