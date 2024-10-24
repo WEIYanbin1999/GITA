@@ -12,20 +12,19 @@ Introducing **GVLQA Benchmark**, the **first-ever** vision-language reasoning be
 
 Introducing **GITA-7B/13B**, a groundbreaking series of Vision-Language Models crafted specifically for vision-language graph reasoning. These models are expertly fine-tuned on the GVLQA datasets using the powerful LLaVA-1.5 backbone. 🎉
 
-### Pre-Trained Vision-Language Models with Graph Structural Understanding
+### GITA-7B/13B are Pre-Trained Vision-Language Models with Graph Structural Understanding
 
-Harness the power of **GITA-7B/13B**, pre-trained models uniquely equipped with graph structural understanding. This capability makes them particularly valuable for addressing a variety of graph-related challenges. Enhanced with modified weights distinct from the original LLaVA, these models are available in the `checkpoints/Vision_Text/GVLQA_BASE` directory. You have the flexibility to use these models as they are or to re-train them to better fit your specific requirements.
-
-Their ability to perceive and process graph structures distinguishes them as a robust start point for any project requiring advanced graph reasoning capabilities.
+**GITA-7B/13B** are pre-trained vision-language models uniquely equipped with graph structural understanding. Their ability to perceive and process graph structures distinguishes them as a robust starting point for any project requiring advanced graph reasoning capabilities.
 
 ### Model Zoo
 
-For your convenience, we offer a packed version that integrates all weights from both the GITA modifications (LoRa Adaptor and projector) and the original LLaVA weights into a single comprehensive model. Explore our Model Zoo for seamless access:
+We include the finetuned weights of GITA-7B/13B (LoRa Adaptor and projector) in the `checkpoints/Vision_Text/GVLQA_BASE` directory, they should be used together with LLaVA-v1.5 as we did in `/llava/custom_eval/eval.py` line 201 where invoke the method `load_pretrained_model`. 
+
+To conveniently use GITA-7B/13B as **pre-trained models for downstream graph problems**, we also offer the packed version, where all weights from both the GITA modifications and the original LLaVA weights are packed into a single comprehensive model. Explore our Model Zoo for seamless access:
 
 - **GITA-7B**: [Hugging Face - GITA-7B](https://huggingface.co/Yanbin99/GITA-7B)
 - **GITA-13B**: [Hugging Face - GITA-13B](https://huggingface.co/Yanbin99/GITA-13B)
 
-Dive into your graph reasoning projects with cutting-edge graph-understanding vision-language models GITA-7B/13B!
 
 ## 🛠️ Install
 
