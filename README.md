@@ -45,6 +45,11 @@ sudo apt install graphviz
 Please organize the data as follows:
 
 ```
+├── local_llm
+│   ├── llava-v1.5-7b
+│   ├── llava-v1.5-13b
+│   ├── vicuna-v1.5-7b
+│   ├── vicuna-v1.5-13b
 ├── dataset
 │   ├── GVLQA-BASE
 │   ├── GVLQA-AUGET
