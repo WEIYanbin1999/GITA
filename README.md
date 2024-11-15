@@ -191,10 +191,10 @@ Example for zero-shot GITA-7B Vision-Only on GVLQA-BASE:
 ## 📜 Cite Us
 
 ```bibtex
-@article{wei2024gita,
+@inproceedings{wei2024gita,
   title={Gita: Graph to visual and textual integration for vision-language graph reasoning},
-  author={Wei, Yanbin and Fu, Shuai and Jiang, Weisen and Zhang, Zejian and Zeng, Zhixiong and Wu, Qi and Kwok, James T and Zhang, Yu},
-  journal={Preprint},
+  author={Wei, Yanbin and Fu, Shuai and Jiang, Weisen and Zhang, Zejian and Zeng, Zhixiong and Wu, Qi and Kwok, James and Zhang, Yu},
+  booktitle={The Thirty-eighth Annual Conference on Neural Information Processing Systems},
   year={2024}
 }
 ```
