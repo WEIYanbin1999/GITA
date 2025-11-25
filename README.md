@@ -22,8 +22,8 @@ We include the finetuned weights of GITA-7B/13B (LoRa Adaptor and projector) in 
 
 To conveniently use GITA-7B/13B as **pre-trained models for downstream graph problems**, we also offer the packed version, where all weights from both the GITA modifications and the original LLaVA weights are packed into a single comprehensive model. Explore our Model Zoo for seamless access:
 
-- **GITA-7B**: [Hugging Face - GITA-7B](https://huggingface.co/Yanbin99/GITA-7B)
-- **GITA-13B**: [Hugging Face - GITA-13B](https://huggingface.co/Yanbin99/GITA-13B)
+- **GITA-7B**: [WiseModel - GITA-7B](https://wisemodel.cn/models/WEIYanbin1999/GITA-7B)
+- **GITA-13B**: [WiseModel - GITA-13B](https://wisemodel.cn/models/WEIYanbin1999/GITA-13B)
 
 
 ## 🛠️ Install
